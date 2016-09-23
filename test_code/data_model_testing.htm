@@ -216,12 +216,9 @@ console.log ( "Bottom of script in head section\n" );
 console.log ( "\n\nTop of script in body section\n" );
 
 
-d = document;
-
-// data_model = JSON.parse ( string );  // Use something like this when reading from a file or from a remote host
-
-// For now, use an internal version
-data_model = { "mcell": {
+// Uncomment this to use an internal data model
+/*
+var data_model = { "mcell": {
 
                  "TEST_LIST":[11,22,33,44, {"a":111, "b":222}],
                  "TEST_DICT": {
@@ -322,7 +319,50 @@ data_model = { "mcell": {
              }
 
 console.log ( "\n\nData Model version is " + data_model["mcell"]["cellblender_version"] + "\n\n" );
+*/
 
+// Comment this when using the internal data model
+
+var source_filename = window.location.href;
+var source_path = source_filename.substring(0,source_filename.lastIndexOf("/"));
+var json_file = source_path + "/" + "data_model.json";
+var xmlhttp = new XMLHttpRequest();
+var url = json_file;
+xmlhttp.onreadystatechange=function() {
+    console.log ( "state changed to " + this.readyState );
+    if (this.readyState == 4 && this.status == 200) {
+        // readyState 4 is complete
+        myFunction(this.responseText);
+
+        doc_dm = document.getElementById("datamodel");
+
+        /*
+        dyn_item_li = document.createElement("li");
+        dyn_text = document.createTextNode("mcell");
+        dyn_item_li.appendChild(dyn_text);
+        doc_dm.appendChild(dyn_item_li);
+        */
+
+        dyn_sublist_ul = document.createElement("ul");
+
+        build_elements_from_object ( data_model["mcell"], dyn_sublist_ul, 0 );
+
+        dyn_item_li.appendChild(dyn_sublist_ul);
+        doc_dm.appendChild(dyn_item_li);
+
+
+        ddtreemenu.createTree("datamodel", true);
+
+        console.log ( "Done loading Data Model");
+    }
+}
+xmlhttp.open("GET", url, true);
+xmlhttp.send();
+
+
+function myFunction(response) {
+    data_model = JSON.parse(response);
+}
 
 
 function build_elements_from_array ( arr, parent_ul, depth ) {
