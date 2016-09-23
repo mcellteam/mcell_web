@@ -362,7 +362,7 @@ console.log( "After building ... tm2_ul.className = " + tm2_ul.className + "\n" 
 
 data_model = { "mcell": {
                  "cellblender_version": "0.1.54",
-                 "test_list":[1,2,3],
+                 "test_list":[11,22,33,44],
                  "test_dict": {
                    "name": "Test Dictionary",
                    "sub_dict": {
@@ -461,7 +461,42 @@ console.log ( "\n\nData Model version is " + data_model["mcell"]["cellblender_ve
 
 
 
-function build_elements_from_array ( arr, parent_ul ) {
+function build_elements_from_array ( arr, parent_ul, depth ) {
+  var i;
+  var x;
+  var item_li;
+  var item_text;
+  var sublist_ul;
+  var spaces = "                                                                         ";
+  var indent = spaces.substring(0,depth);
+  i = 0;
+  for (x in arr) { // The "x" appears to be the index for arrays!!
+    console.log ( indent + "Array contains " + arr[x] + "\n" );
+    item_li = document.createElement("li");
+    if (typeof(arr[x]) != "object") {
+      console.log ( indent + "  Scalar at index " + x + " is " + arr[x] + "\n" );
+      // This is not an array or dictionary (both are "objects" in JavaScript)
+      item_text = document.createTextNode(" [" + x + "] = " + arr[x] + " is of type " + typeof(x) );
+      item_li.appendChild(item_text);
+    } else {
+      // An "object" can be an array or dictionary
+      if (arr[x] instanceof Array) {  // Note that instanceof may not always work ... check for problems!!
+        item_text = document.createTextNode("Item at " + x + " is an array of length " + arr[x].length + "\n" );
+        item_li.appendChild(item_text);
+        sublist_ul = document.createElement("ul");
+        build_elements_from_array ( arr[x], sublist_ul, depth+1 );
+        item_li.appendChild(sublist_ul);
+      } else {
+        item_text = document.createTextNode("Item at " + x + " is an object\n" );
+        item_li.appendChild(item_text);
+        sublist_ul = document.createElement("ul");
+        build_elements_from_object ( arr[x], sublist_ul, depth+1 );
+        item_li.appendChild(sublist_ul);
+      }
+    }
+    parent_ul.appendChild(item_li);
+    i += 1;
+  }
 }
 
 
@@ -472,7 +507,7 @@ function build_elements_from_object ( obj, parent_ul, depth ) {
   var sublist_ul;
   var spaces = "                                                                         ";
   var indent = spaces.substring(0,depth);
-  for (x in obj) {
+  for (x in obj) { // The "x" appears to be the "key" for objects
     console.log ( indent + "Object contains " + x + "\n" );
     item_li = document.createElement("li");
     if (typeof(obj[x]) != "object") {
@@ -483,9 +518,11 @@ function build_elements_from_object ( obj, parent_ul, depth ) {
     } else {
       // An "object" can be an array or dictionary
       if (obj[x] instanceof Array) {  // Note that instanceof may not always work ... check for problems!!
-        item_text = document.createTextNode(x + " is an array\n" );
-        //build_elements_from_array ( obj[x], sublist_ul );
+        item_text = document.createTextNode(x + " is an array of length " + obj[x].length + "\n" );
         item_li.appendChild(item_text);
+        sublist_ul = document.createElement("ul");
+        build_elements_from_array ( obj[x], sublist_ul, depth+1 );
+        item_li.appendChild(sublist_ul);
       } else {
         item_text = document.createTextNode(x + " is an object\n" );
         item_li.appendChild(item_text);
