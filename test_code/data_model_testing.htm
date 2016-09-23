@@ -461,39 +461,40 @@ console.log ( "\n\nData Model version is " + data_model["mcell"]["cellblender_ve
 
 
 
-function build_elements_from_array ( arr, parent_list_element ) {
+function build_elements_from_array ( arr, parent_ul ) {
 }
 
 
-function build_elements_from_object ( obj, parent_list_element, depth ) {
+function build_elements_from_object ( obj, parent_ul, depth ) {
   var x;
-  var list_item;
+  var item_li;
   var item_text;
+  var sublist_ul;
   var spaces = "                                                                         ";
   var indent = spaces.substring(0,depth);
   for (x in obj) {
     console.log ( indent + "Object contains " + x + "\n" );
-    list_item = document.createElement("li");
+    item_li = document.createElement("li");
     if (typeof(obj[x]) != "object") {
       console.log ( indent + "  Scalar " + x + " is " + obj[x] + "\n" );
       // This is not an array or dictionary (both are "objects" in JavaScript)
       item_text = document.createTextNode(x + " is \"" + obj[x] + "\" of type " + typeof(obj[x]) );
-      list_item.appendChild(item_text);
+      item_li.appendChild(item_text);
     } else {
       // An "object" can be an array or dictionary
       if (obj[x] instanceof Array) {  // Note that instanceof may not always work ... check for problems!!
         item_text = document.createTextNode(x + " is an array\n" );
-        //build_elements_from_array ( obj[x], sublist );
-        list_item.appendChild(item_text);
+        //build_elements_from_array ( obj[x], sublist_ul );
+        item_li.appendChild(item_text);
       } else {
         item_text = document.createTextNode(x + " is an object\n" );
-        list_item.appendChild(item_text);
-        sublist = document.createElement("ul");
-        build_elements_from_object ( obj[x], sublist, depth+1 );
-        list_item.appendChild(sublist);
+        item_li.appendChild(item_text);
+        sublist_ul = document.createElement("ul");
+        build_elements_from_object ( obj[x], sublist_ul, depth+1 );
+        item_li.appendChild(sublist_ul);
       }
     }
-    parent_list_element.appendChild(list_item);
+    parent_ul.appendChild(item_li);
   }
 }
 
