@@ -250,37 +250,37 @@ console.log( "After getting ... tm1.className = " + tm1.className + "\n" );
 
 tm1.className = "treeview";
 
-dyn_item = document.createElement("li");
+dyn_item_li = document.createElement("li");
 dyn_text = document.createTextNode("Item 1 (dynamic)");
-dyn_item.appendChild(dyn_text);
-tm1.appendChild(dyn_item);
+dyn_item_li.appendChild(dyn_text);
+tm1.appendChild(dyn_item_li);
 
-dyn_sublist = document.createElement("ul");
+dyn_sublist_ul = document.createElement("ul");
 
-    dyn_subitem = document.createElement("li");
+    dyn_subitem_li = document.createElement("li");
     dyn_subtext = document.createTextNode("Sub Item 1 (dynamic)");
-    dyn_subitem.appendChild(dyn_subtext);
-    dyn_sublist.appendChild(dyn_subitem);
+    dyn_subitem_li.appendChild(dyn_subtext);
+    dyn_sublist_ul.appendChild(dyn_subitem_li);
 
-    dyn_subitem = document.createElement("li");
+    dyn_subitem_li = document.createElement("li");
     dyn_subtext = document.createTextNode("Sub Item 2 (dynamic)");
-    dyn_subitem.appendChild(dyn_subtext);
-    dyn_sublist.appendChild(dyn_subitem);
+    dyn_subitem_li.appendChild(dyn_subtext);
+    dyn_sublist_ul.appendChild(dyn_subitem_li);
 
-dyn_item.appendChild(dyn_sublist);
-tm1.appendChild(dyn_item);
+dyn_item_li.appendChild(dyn_sublist_ul);
+tm1.appendChild(dyn_item_li);
 
 
-dyn_item = document.createElement("li");
+dyn_item_li = document.createElement("li");
 dyn_text = document.createTextNode("Item 2 (dynamic)");
-dyn_item.appendChild(dyn_text);
-tm1.appendChild(dyn_item);
+dyn_item_li.appendChild(dyn_text);
+tm1.appendChild(dyn_item_li);
 
 
-dyn_item = document.createElement("li");
+dyn_item_li = document.createElement("li");
 dyn_text = document.createTextNode("Item 3 (dynamic)");
-dyn_item.appendChild(dyn_text);
-tm1.appendChild(dyn_item);
+dyn_item_li.appendChild(dyn_text);
+tm1.appendChild(dyn_item_li);
 
 
 console.log( "After building ... tm1.className = " + tm1.className + "\n" );
@@ -289,76 +289,73 @@ console.log( "After building ... tm1.className = " + tm1.className + "\n" );
 
 
 
-tm2 = document.getElementById("treemenu2"); // This is a <ul> item
+tm2_ul = document.getElementById("treemenu2"); // This is a <ul> item
 
-console.log( "After getting ... tm2.className = " + tm2.className + "\n" );
+console.log( "After getting ... tm2_ul.className = " + tm2_ul.className + "\n" );
 
-tm2.className = "treeview";
+tm2_ul.className = "treeview";
 
-dyn_item = document.createElement("li");                   // This will be the parent of the sublist
-dyn_item.appendChild(document.createTextNode("Item 1 (dynamic)"));
-tm2.appendChild(dyn_item);
+dyn_item_li = document.createElement("li");                   // This will be the parent of the sublist
+dyn_item_li.appendChild(document.createTextNode("Item 1 (dynamic)"));
+tm2_ul.appendChild(dyn_item_li);
 
-dyn_sublist = document.createElement("ul");
+dyn_sublist_ul = document.createElement("ul");
 
-    dyn_subitem = document.createElement("li");
-    dyn_subitem.appendChild(document.createTextNode("Sub Item 1 (dynamic)"));
-    dyn_sublist.appendChild(dyn_subitem);
+    dyn_subitem_li = document.createElement("li");
+    dyn_subitem_li.appendChild(document.createTextNode("Sub Item 1 (dynamic)"));
+    dyn_sublist_ul.appendChild(dyn_subitem_li);
 
-    dyn_subitem = document.createElement("li");                   // This will be the parent of the subsublist
-    dyn_subitem.appendChild(document.createTextNode("Sub Item 2 (dynamic)"));
-    dyn_sublist.appendChild(dyn_subitem);
+    dyn_subitem_li = document.createElement("li");                   // This will be the parent of the subsublist
+    dyn_subitem_li.appendChild(document.createTextNode("Sub Item 2 (dynamic)"));
+    dyn_sublist_ul.appendChild(dyn_subitem_li);
 
-    dyn_sub2list = document.createElement("ul");
+    dyn_sub2list_ul = document.createElement("ul");
 
-        dyn_sub2item = document.createElement("li");
-        dyn_sub2item.appendChild(document.createTextNode("Sub 2 Item 1 (dynamic)"));
-        dyn_sub2list.appendChild(dyn_sub2item);
+        dyn_sub2item_li = document.createElement("li");
+        dyn_sub2item_li.appendChild(document.createTextNode("Sub 2 Item 1 (dynamic)"));
+        dyn_sub2list_ul.appendChild(dyn_sub2item_li);
 
-        dyn_sub2item = document.createElement("li");
-        dyn_sub2item.appendChild(document.createTextNode("Sub 2 Item 2 (dynamic)"));
-        dyn_sub2list.appendChild(dyn_sub2item);
+        dyn_sub2item_li = document.createElement("li");
+        dyn_sub2item_li.appendChild(document.createTextNode("Sub 2 Item 2 (dynamic)"));
+        dyn_sub2list_ul.appendChild(dyn_sub2item_li);
 
+        dyn_sub3list_ul = document.createElement("ul");
 
+            dyn_sub3item_li = document.createElement("li");
+            dyn_sub3item_li.appendChild(document.createTextNode("Sub 3 Item 1 (dynamic)"));
+            dyn_sub3list_ul.appendChild(dyn_sub3item_li);
 
-        dyn_sub3list = document.createElement("ul");
+            dyn_sub3item_li = document.createElement("li");
+            dyn_sub3item_li.appendChild(document.createTextNode("Sub 3 Item 2 (dynamic)"));
+            dyn_sub3list_ul.appendChild(dyn_sub3item_li);
 
-            dyn_sub3item = document.createElement("li");
-            dyn_sub3item.appendChild(document.createTextNode("Sub 3 Item 1 (dynamic)"));
-            dyn_sub3list.appendChild(dyn_sub3item);
+        dyn_sub2item_li.appendChild(dyn_sub3list_ul);
 
-            dyn_sub3item = document.createElement("li");
-            dyn_sub3item.appendChild(document.createTextNode("Sub 3 Item 2 (dynamic)"));
-            dyn_sub3list.appendChild(dyn_sub3item);
+        dyn_sub2item_li = document.createElement("li");
+        dyn_sub2item_li.appendChild(document.createTextNode("Sub 2 Item 3 (dynamic)"));
+        dyn_sub2list_ul.appendChild(dyn_sub2item_li);
 
-        dyn_sub2item.appendChild(dyn_sub3list);
+    dyn_subitem_li.appendChild(dyn_sub2list_ul);
 
-        dyn_sub2item = document.createElement("li");
-        dyn_sub2item.appendChild(document.createTextNode("Sub 2 Item 3 (dynamic)"));
-        dyn_sub2list.appendChild(dyn_sub2item);
+    dyn_subitem_li = document.createElement("li");
+    dyn_subitem_li.appendChild(document.createTextNode("Sub Item 3 (dynamic)"));
+    dyn_sublist_ul.appendChild(dyn_subitem_li);
 
-
-    dyn_subitem.appendChild(dyn_sub2list);
-
-    dyn_subitem = document.createElement("li");
-    dyn_subitem.appendChild(document.createTextNode("Sub Item 3 (dynamic)"));
-    dyn_sublist.appendChild(dyn_subitem);
-
-dyn_item.appendChild(dyn_sublist);
-tm2.appendChild(dyn_item);
+dyn_item_li.appendChild(dyn_sublist_ul);
+tm2_ul.appendChild(dyn_item_li);
 
 
-dyn_item = document.createElement("li");
-dyn_item.appendChild(document.createTextNode("Item 2 (dynamic)"));
-tm2.appendChild(dyn_item);
+dyn_item_li = document.createElement("li");
+dyn_item_li.appendChild(document.createTextNode("Item 2 (dynamic)"));
+tm2_ul.appendChild(dyn_item_li);
 
 
-dyn_item = document.createElement("li");
-dyn_item.appendChild(document.createTextNode("Item 3 (dynamic)"));
-tm2.appendChild(dyn_item);
+dyn_item_li = document.createElement("li");
+dyn_item_li.appendChild(document.createTextNode("Item 3 (dynamic)"));
+tm2_ul.appendChild(dyn_item_li);
 
 
-console.log( "After building ... tm2.className = " + tm2.className + "\n" );
+console.log( "After building ... tm2_ul.className = " + tm2_ul.className + "\n" );
 
 
 
@@ -504,17 +501,17 @@ function build_elements_from_object ( obj, parent_list_element, depth ) {
 doc_dm = document.getElementById("datamodel");
 
 
-dyn_item = document.createElement("li");
+dyn_item_li = document.createElement("li");
 dyn_text = document.createTextNode("mcell");
-dyn_item.appendChild(dyn_text);
-doc_dm.appendChild(dyn_item);
+dyn_item_li.appendChild(dyn_text);
+doc_dm.appendChild(dyn_item_li);
 
-dyn_sublist = document.createElement("ul");
+dyn_sublist_ul = document.createElement("ul");
 
-build_elements_from_object ( data_model["mcell"], dyn_sublist, 0 );
+build_elements_from_object ( data_model["mcell"], dyn_sublist_ul, 0 );
 
-dyn_item.appendChild(dyn_sublist);
-doc_dm.appendChild(dyn_item);
+dyn_item_li.appendChild(dyn_sublist_ul);
+doc_dm.appendChild(dyn_item_li);
 
 
 
@@ -522,7 +519,7 @@ ddtreemenu.createTree("treemenu1", true);
 ddtreemenu.createTree("treemenu2", true);
 ddtreemenu.createTree("datamodel", true);
 
-console.log( "After creating Trees ... tm2.className = " + tm2.className + "\n" );
+console.log( "After creating Trees ... tm2_ul.className = " + tm2_ul.className + "\n" );
 
 console.log ( "Bottom of script in body section\n" );
 
