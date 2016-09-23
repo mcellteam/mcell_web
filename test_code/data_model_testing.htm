@@ -254,11 +254,6 @@ dyn_subtext = document.createTextNode("Sub Item 2 (dynamic)")
 dyn_subitem.appendChild(dyn_subtext)
 dyn_sublist.appendChild(dyn_subitem)
 
-dyn_subitem = document.createElement("li")
-dyn_subtext = document.createTextNode("Sub Item 3 (dynamic)")
-dyn_subitem.appendChild(dyn_subtext)
-dyn_sublist.appendChild(dyn_subitem)
-
 dyn_item.appendChild(dyn_sublist)
 tm2.appendChild(dyn_item)
 
@@ -370,6 +365,30 @@ data_model = { "mcell": {
 
 console.log ( "\n\nData Model version is " + data_model["mcell"]["cellblender_version"] )
 
+function build_elements_from_object ( obj, parent_element ) {
+  for (x in obj) {
+    console.log ( "Object contains " + x + "\n" );
+    dyn_subitem = document.createElement("li")
+    if (typeof(obj[x]) != "object") {
+      // This is not an array or dictionary (both are "objects" in JavaScript)
+      dyn_subtext = document.createTextNode(x + " is a " + typeof(data_model["mcell"][x]) )
+    } else {
+      // An "object" can be an array or dictionary
+      if (data_model["mcell"][x] instanceof Array) {  // Note that instanceof may not always work ... check for problems!!
+        dyn_subtext = document.createTextNode(x + " is an array\n" )
+      } else {
+        dyn_subtext = document.createTextNode(x + " is an object\n" )
+      }
+    }
+    dyn_subitem.appendChild(dyn_subtext)
+    parent_element.appendChild(dyn_subitem)
+  }
+}
+
+function build_elements_from_array ( arr ) {
+}
+
+
 doc_dm = document.getElementById("datamodel")
 
 
@@ -380,7 +399,9 @@ doc_dm.appendChild(dyn_item)
 
 dyn_sublist = document.createElement("ul")
 
+build_elements_from_object ( data_model["mcell"], dyn_sublist );
 
+/*
 var text = "";
 var x;
 for (x in data_model["mcell"]) {
@@ -396,6 +417,7 @@ for (x in data_model["mcell"]) {
   dyn_subitem.appendChild(dyn_subtext)
   dyn_sublist.appendChild(dyn_subitem)
 }
+*/
 
 dyn_item.appendChild(dyn_sublist)
 doc_dm.appendChild(dyn_item)
