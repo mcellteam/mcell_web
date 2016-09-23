@@ -1,0 +1,333 @@
+<!DOCTYPE html5>
+<html>
+<head>
+
+<script>
+
+/// Example from http://www.dynamicdrive.com/dynamicindex1/navigate1.htm
+
+console.log ( "Top of script in head section\n" );
+
+var persisteduls=new Object()
+var ddtreemenu=new Object()
+
+
+ddtreemenu.closefolder = "closed.gif" //set image path to "closed" folder image
+ddtreemenu.openfolder  = "open.gif"   //set image path to "open" folder image
+
+
+ddtreemenu.createTree = function(treeid, enablepersist, persistdays) {
+  console.log ( " Top of createTree for " + treeid + "\n" )
+  var ultags = document.getElementById(treeid).getElementsByTagName("ul")
+  console.log ( "   ultags = " + ultags + " has " + ultags.length + " elements\n" )
+  if (typeof persisteduls[treeid] == "undefined") {
+    persisteduls[treeid] = (enablepersist==true && ddtreemenu.getCookie(treeid)!="") ? ddtreemenu.getCookie(treeid).split(",") : ""
+  }
+  for (var i=0; i<ultags.length; i++) {
+    ddtreemenu.buildSubTree(treeid, ultags[i], i)
+  }
+  if (enablepersist==true) { //if enable persist feature
+    var durationdays=(typeof persistdays=="undefined")? 1 : parseInt(persistdays)
+    ddtreemenu.dotask ( window, function() { ddtreemenu.rememberstate(treeid, durationdays) }, "unload" ) //save opened UL indexes on body unload
+  }
+  console.log ( " Bottom of createTree for " + treeid + "\n" )
+}
+
+
+ddtreemenu.buildSubTree = function ( treeid, ulelement, index ) {
+  console.log ( "  Top of buildSubTree for " + treeid + "\n" )
+  ulelement.parentNode.className="submenu"
+
+  if (typeof persisteduls[treeid]=="object") {
+    //if cookie exists (persisteduls[treeid] is an array versus "" string)
+    if (ddtreemenu.searcharray(persisteduls[treeid], index)) {
+      ulelement.setAttribute("rel", "open")
+      ulelement.style.display="block"
+      ulelement.parentNode.style.backgroundImage="url("+ddtreemenu.openfolder+")"
+    } else {
+      ulelement.setAttribute("rel", "closed")
+    }
+    //end cookie persist code
+  } else if (ulelement.getAttribute("rel")==null || ulelement.getAttribute("rel")==false) { //if no cookie and UL has NO rel attribute explicted added by user
+    ulelement.setAttribute("rel", "closed")
+  } else if (ulelement.getAttribute("rel")=="open") { //else if no cookie and this UL has an explicit rel value of "open"
+    ddtreemenu.expandSubTree(treeid, ulelement) //expand this UL plus all parent ULs (so the most inner UL is revealed!)
+  }
+
+  ulelement.parentNode.onclick = function(e) {
+    var submenu=this.getElementsByTagName("ul")[0]
+    if (submenu.getAttribute("rel")=="closed") {
+      submenu.style.display="block"
+      submenu.setAttribute("rel", "open")
+      ulelement.parentNode.style.backgroundImage="url("+ddtreemenu.openfolder+")"
+    } else if (submenu.getAttribute("rel")=="open") {
+      submenu.style.display="none"
+      submenu.setAttribute("rel", "closed")
+      ulelement.parentNode.style.backgroundImage="url("+ddtreemenu.closefolder+")"
+    }
+    ddtreemenu.preventpropagate(e)
+  }
+  ulelement.onclick = function(e) {
+    ddtreemenu.preventpropagate(e)
+  }
+  console.log ( "  Bottom of buildSubTree for " + treeid + "\n" )
+}
+
+
+ddtreemenu.expandSubTree = function(treeid, ulelement) { //expand a UL element and any of its parent ULs
+  var rootnode=document.getElementById(treeid)
+  var currentnode=ulelement
+  currentnode.style.display="block"
+  currentnode.parentNode.style.backgroundImage="url("+ddtreemenu.openfolder+")"
+  while (currentnode!=rootnode) {
+    if (currentnode.tagName=="UL") { //if parent node is a UL, expand it too
+      currentnode.style.display="block"
+      currentnode.setAttribute("rel", "open") //indicate it's open
+      currentnode.parentNode.style.backgroundImage="url("+ddtreemenu.openfolder+")"
+    }
+    currentnode=currentnode.parentNode
+  }
+}
+
+
+ddtreemenu.flatten=function(treeid, action){ //expand or contract all UL elements
+  var ultags=document.getElementById(treeid).getElementsByTagName("ul")
+  for (var i=0; i<ultags.length; i++){
+    ultags[i].style.display=(action=="expand")? "block" : "none"
+    var relvalue=(action=="expand")? "open" : "closed"
+    ultags[i].setAttribute("rel", relvalue)
+    ultags[i].parentNode.style.backgroundImage=(action=="expand")? "url("+ddtreemenu.openfolder+")" : "url("+ddtreemenu.closefolder+")"
+  }
+}
+
+
+ddtreemenu.rememberstate=function(treeid, durationdays) { //store index of opened ULs relative to other ULs in Tree into cookie
+  var ultags=document.getElementById(treeid).getElementsByTagName("ul")
+  var openuls=new Array()
+  for (var i=0; i<ultags.length; i++) {
+    if (ultags[i].getAttribute("rel")=="open") {
+      openuls[openuls.length]=i //save the index of the opened UL (relative to the entire list of ULs) as an array element
+    }
+  }
+  if (openuls.length==0) //if there are no opened ULs to save/persist
+    openuls[0]="none open" //set array value to string to simply indicate all ULs should persist with state being closed
+  ddtreemenu.setCookie(treeid, openuls.join(","), durationdays) //populate cookie with value treeid=1,2,3 etc (where 1,2... are the indexes of the opened ULs)
+}
+
+////A few utility functions below//////////////////////
+
+ddtreemenu.getCookie=function(Name) { //get cookie value
+  var re=new RegExp(Name+"=[^;]+", "i"); //construct RE to search for target name/value pair
+  if (document.cookie.match(re)) //if cookie found
+  return document.cookie.match(re)[0].split("=")[1] //return its value
+  return ""
+}
+
+ddtreemenu.setCookie=function(name, value, days) { //set cookei value
+  var expireDate = new Date()
+  //set "expstring" to either future or past date, to set or delete cookie, respectively
+  var expstring=expireDate.setDate(expireDate.getDate()+parseInt(days))
+  document.cookie = name+"="+value+"; expires="+expireDate.toGMTString()+"; path=/";
+}
+
+
+ddtreemenu.searcharray=function(thearray, value) { //searches an array for the entered value. If found, delete value from array
+  var isfound=false
+  for (var i=0; i<thearray.length; i++) {
+    if (thearray[i]==value) {
+      isfound=true
+      thearray.shift() //delete this element from array for efficiency sake
+      break
+    }
+  }
+  return isfound
+}
+
+ddtreemenu.preventpropagate=function(e) { //prevent action from bubbling upwards
+  if (typeof e!="undefined")
+    e.stopPropagation()
+  else
+    event.cancelBubble=true
+}
+
+ddtreemenu.dotask=function(target, functionref, tasktype) { //assign a function to execute to an event handler (ie: onunload)
+  var tasktype=(window.addEventListener)? tasktype : "on"+tasktype
+  if (target.addEventListener)
+    target.addEventListener(tasktype, functionref, false)
+  else if (target.attachEvent)
+    target.attachEvent(tasktype, functionref)
+}
+
+console.log ( "Bottom of script in head section\n" );
+
+</script>
+
+
+<style>
+
+.treeview ul { /*CSS for Simple Tree Menu*/
+  margin: 0;
+  padding: 0;
+}
+
+.treeview li { /*Style for LI elements in general (excludes an LI that contains sub lists)*/
+  background: white url(list.gif) no-repeat left center;
+  list-style-type: none;
+  padding-left: 22px;
+  margin-bottom: 3px;
+}
+
+.treeview li.submenu { /* Style for LI that contains sub lists (other ULs). */
+  background: white url(closed.gif) no-repeat left 1px;
+  /* cursor: hand !important; */
+  cursor: pointer !important;
+}
+
+
+.treeview li.submenu ul { /*Style for ULs that are children of LIs (submenu) */
+  display: none; /*Hide them by default. Don't delete. */
+}
+
+.treeview .submenu ul li { /*Style for LIs of ULs that are children of LIs (submenu) */
+  cursor: default;
+}
+
+</style>
+
+
+</head>
+
+
+
+<body>
+
+
+
+<h4>Simple Tree 1: &nbsp; 
+<a href="javascript:ddtreemenu.flatten('treemenu1', 'expand')">Expand All</a>
+ &nbsp; <a href="javascript:ddtreemenu.flatten('treemenu1', 'contract')">Collapse All</a>
+</h4>
+
+<ul id="treemenu1" class="treeview">
+  <li>Static Item</li>
+  <li>Item 1 (static)
+    <ul>
+      <li>Sub Item 1 (static)</li>
+      <li>Sub Item 2 (static)</li>
+      <li>Sub Item 3 (static)</li>
+    </ul>
+  </li>
+  <li>Item 2 (static)</li>
+  <li>Item 3 (static)</li>
+</ul>
+
+
+<h4>Simple Tree 2: &nbsp; 
+<a href="javascript:ddtreemenu.flatten('treemenu2', 'expand')">Expand All</a>
+ &nbsp; <a href="javascript:ddtreemenu.flatten('treemenu2', 'contract')">Collapse All</a>
+</h4>
+
+<ul id="treemenu2" class="treeview">
+  <li>Static Item</li>
+</ul>
+
+
+<h4>Data Model Tree: &nbsp; 
+<a href="javascript:ddtreemenu.flatten('datamodel', 'expand')">Expand All</a>
+ &nbsp; <a href="javascript:ddtreemenu.flatten('datamodel', 'contract')">Collapse All</a>
+</h4>
+
+<ul id="datamodel" class="treeview">
+  <li>Data Model</li>
+</ul>
+
+
+<script type="text/javascript">
+
+data_model = {"mcell": {"cellblender_version": "0.1.54", "simulation_control": {"name": "", "processes_list": [{"name": "PID: 32375, MDL: Scene.main.mdl, Seed: 1", "data_model_version": "DM_2015_04_23_1753"}, {"name": "PID: 32699, MDL: Scene.main.mdl, Seed: 1", "data_model_version": "DM_2015_04_23_1753"}], "end_seed": "1", "start_seed": "1", "data_model_version": "DM_2016_04_15_1430"}, "mol_viz": {"file_start_index": 0, "file_dir": "../../../../../../../home/bobkuczewski/proj/MCell/tutorials/intro/2016_09_21/libMCellPP_Test_files/mcell/viz_data/seed_00001", "file_stop_index": 9, "manual_select_viz_dir": false, "file_num": 10, "file_step_index": 1, "viz_list": ["mol_a", "mol_b"], "file_index": 0, "color_index": 0, "color_list": [[0.800000011920929, 0.0, 0.0], [0.0, 0.800000011920929, 0.0], [0.0, 0.0, 0.800000011920929], [0.0, 0.800000011920929, 0.800000011920929], [0.800000011920929, 0.0, 0.800000011920929], [0.800000011920929, 0.800000011920929, 0.0], [1.0, 1.0, 1.0], [0.0, 0.0, 0.0]], "render_and_save": false, "viz_enable": true, "file_name": "Scene.cellbin.00.dat", "data_model_version": "DM_2015_04_13_1700", "active_seed_index": 0, "seed_list": ["seed_00001"]}, "model_objects": {"model_object_list": [{"name": "Cube"}], "data_model_version": "DM_2014_10_24_1638"}, "define_surface_classes": {"surface_class_list": [], "data_model_version": "DM_2014_10_24_1638"}, "viz_output": {"all_iterations": true, "end": "1", "export_all": true, "start": "0", "step": "1", "data_model_version": "DM_2014_10_24_1638"}, "define_release_patterns": {"release_pattern_list": [], "data_model_version": "DM_2014_10_24_1638"}, "define_reactions": {"reaction_list": [{"reactants": "b", "name": "b -> NULL", "variable_rate": "", "bkwd_rate": "", "rxn_name": "", "variable_rate_text": "", "rxn_type": "irreversible", "products": "NULL", "variable_rate_valid": false, "fwd_rate": "3e5", "variable_rate_switch": false, "data_model_version": "DM_2014_10_24_1638"}], "data_model_version": "DM_2014_10_24_1638"}, "release_sites": {"release_site_list": [{"location_x": ".1", "name": "Release_Site_1", "release_probability": "1", "points_list": [], "object_expr": "Cube", "quantity_type": "NUMBER_TO_RELEASE", "pattern": "", "stddev": "0", "location_z": "0", "location_y": "0", "molecule": "a", "site_diameter": ".01", "orient": "'", "shape": "OBJECT", "quantity": "10", "data_model_version": "DM_2015_11_11_1717"}, {"location_x": "0", "name": "Release_Site_2", "release_probability": "1", "points_list": [], "object_expr": "", "quantity_type": "GAUSSIAN_RELEASE_NUMBER", "pattern": "", "stddev": "0", "location_z": "0.1", "location_y": "0", "molecule": "b", "site_diameter": ".1", "orient": "'", "shape": "SPHERICAL", "quantity": "2", "data_model_version": "DM_2015_11_11_1717"}], "data_model_version": "DM_2014_10_24_1638"}, "blender_version": [2, 77, 0], "cellblender_source_sha1": "d868a471cf8a3329dffa38bf7391c52d05fd82f9", "api_version": 0, "geometrical_objects": {"object_list": [{"element_connections": [[3, 0, 1], [7, 2, 3], [5, 6, 7], [1, 4, 5], [2, 4, 0], [7, 1, 5], [3, 2, 0], [7, 6, 2], [5, 4, 6], [1, 0, 4], [2, 6, 4], [7, 3, 1]], "name": "Cube", "location": [0.09687475115060806, 0.0, 0.0], "vertex_list": [[-0.025000005960464478, -0.025000005960464478, -0.025000005960464478], [-0.025000005960464478, -0.025000005960464478, 0.025000005960464478], [-0.025000005960464478, 0.025000005960464478, -0.025000005960464478], [-0.025000005960464478, 0.025000005960464478, 0.025000005960464478], [0.025000005960464478, -0.025000005960464478, -0.025000005960464478], [0.025000005960464478, -0.025000005960464478, 0.025000005960464478], [0.025000005960464478, 0.025000005960464478, -0.025000005960464478], [0.025000005960464478, 0.025000005960464478, 0.025000005960464478]]}]}, "modify_surface_regions": {"modify_surface_regions_list": [], "data_model_version": "DM_2014_10_24_1638"}, "initialization": {"space_step": "", "radial_subdivisions": "", "center_molecules_on_grid": false, "iterations": "9", "surface_grid_density": "10000", "notifications": {"molecule_collision_report": false, "partition_location_report": false, "box_triangulation_report": false, "final_summary": true, "file_output_report": false, "all_notifications": "INDIVIDUAL", "progress_report": true, "probability_report": "ON", "release_event_report": true, "diffusion_constant_report": "BRIEF", "iteration_report": true, "varying_probability_report": true, "probability_report_threshold": "0"}, "time_step_max": "", "microscopic_reversibility": "OFF", "warnings": {"useless_volume_orientation": "WARNING", "high_probability_threshold": "1", "lifetime_threshold": "50", "degenerate_polygons": "WARNING", "missed_reactions": "WARNING", "negative_diffusion_constant": "WARNING", "negative_reaction_rate": "WARNING", "missing_surface_orientation": "ERROR", "high_reaction_probability": "IGNORED", "all_warnings": "INDIVIDUAL", "lifetime_too_short": "WARNING", "missed_reaction_threshold": "0.001"}, "time_step": "1e-6", "radial_directions": "", "interaction_radius": "", "accurate_3d_reactions": true, "partitions": {"x_end": "1", "z_end": "1", "z_start": "-1", "y_end": "1", "recursion_flag": false, "y_step": "0.02", "include": false, "x_start": "-1", "z_step": "0.02", "x_step": "0.02", "y_start": "-1", "data_model_version": "DM_2016_04_15_1600"}, "vacancy_search_distance": "", "data_model_version": "DM_2014_10_24_1638"}, "parameter_system": {"model_parameters": [], "_extras": {"ordered_id_names": []}}, "scripting": {"force_property_update": true, "scripting_list": [], "show_simulation_scripting": false, "script_texts": {}, "dm_external_file_name": "", "show_data_model_scripting": false, "dm_internal_file_name": "", "data_model_version": "DM_2016_03_15_1900"}, "define_molecules": {"molecule_list": [{"display": {"glyph": "Sphere_1", "color": [1.0, 0.0, 0.0], "scale": 1.0, "emit": 0.0}, "mol_type": "3D", "mol_name": "a", "export_viz": false, "maximum_step_length": "", "custom_time_step": "", "custom_space_step": "", "target_only": false, "mol_bngl_label": "", "diffusion_constant": "1e-6", "data_model_version": "DM_2016_01_13_1930"}, {"display": {"glyph": "Sphere_1", "color": [0.0, 1.0, 0.0], "scale": 1.0, "emit": 0.0}, "mol_type": "3D", "mol_name": "b", "export_viz": false, "maximum_step_length": "", "custom_time_step": "", "custom_space_step": "", "target_only": false, "mol_bngl_label": "", "diffusion_constant": "1e-7", "data_model_version": "DM_2016_01_13_1930"}], "data_model_version": "DM_2014_10_24_1638"}, "materials": {"material_dict": {}}, "reaction_data_output": {"combine_seeds": true, "rxn_step": "", "plot_layout": " plot ", "output_buf_size": "", "plot_legend": "0", "mol_colors": false, "always_generate": true, "reaction_output_list": [], "data_model_version": "DM_2016_03_15_1800"}, "data_model_version": "DM_2014_10_24_1638"}}
+
+console.log ( "Data Model version is " + data_model["mcell"]["cellblender_version"] )
+
+console.log ( "\n\nTop of script in body section\n" );
+
+
+d = document
+
+
+tm2 = document.getElementById("treemenu2")
+
+console.log( "After getting ... tm2.className = " + tm2.className + "\n" )
+
+tm2.className = "treeview"
+
+dyn_item = document.createElement("li")
+dyn_text = document.createTextNode("Item 1 (dynamic)")
+dyn_item.appendChild(dyn_text)
+tm2.appendChild(dyn_item)
+
+dyn_sublist = document.createElement("ul")
+
+dyn_subitem = document.createElement("li")
+dyn_subtext = document.createTextNode("Sub Item 1 (dynamic)")
+dyn_subitem.appendChild(dyn_subtext)
+dyn_sublist.appendChild(dyn_subitem)
+
+dyn_subitem = document.createElement("li")
+dyn_subtext = document.createTextNode("Sub Item 2 (dynamic)")
+dyn_subitem.appendChild(dyn_subtext)
+dyn_sublist.appendChild(dyn_subitem)
+
+dyn_subitem = document.createElement("li")
+dyn_subtext = document.createTextNode("Sub Item 3 (dynamic)")
+dyn_subitem.appendChild(dyn_subtext)
+dyn_sublist.appendChild(dyn_subitem)
+
+dyn_item.appendChild(dyn_sublist)
+tm2.appendChild(dyn_item)
+
+
+dyn_item = document.createElement("li")
+dyn_text = document.createTextNode("Item 2 (dynamic)")
+dyn_item.appendChild(dyn_text)
+tm2.appendChild(dyn_item)
+
+
+dyn_item = document.createElement("li")
+dyn_text = document.createTextNode("Item 3 (dynamic)")
+dyn_item.appendChild(dyn_text)
+tm2.appendChild(dyn_item)
+
+
+console.log( "After building ... tm2.className = " + tm2.className + "\n" )
+
+ddtreemenu.createTree("treemenu1", true)
+ddtreemenu.createTree("treemenu2", true)
+ddtreemenu.createTree("datamodel", true)
+
+console.log( "After creating Trees ... tm2.className = " + tm2.className + "\n" )
+
+console.log ( "Bottom of script in body section\n" );
+
+</script>
+
+<!--
+  d = document
+  d.all
+  d.all[0]
+  tm1 = d.getElementById("treemenu1")
+  tm1.className
+  tm1.children
+  tm1.children.length
+  tm1.removeChild(tm1.children[0])
+  i0 = d.createElement("li")
+  t0 = d.createTextNode("Item 0")
+  i0.appendChild(t0)
+  tm1.insertBefore(i0,tm1.childNodes[0])
+
+  tm2 = document.getElementById("treemenu4")
+  
+-->
+
+</body>
+</html>
+
