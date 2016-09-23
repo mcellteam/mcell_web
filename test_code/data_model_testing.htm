@@ -195,44 +195,19 @@ console.log ( "Bottom of script in head section\n" );
 
 </style>
 
-
 </head>
-
 
 
 <body>
 
 
-
-<h4>Simple Tree 1: &nbsp;
-<a href="javascript:ddtreemenu.flatten('treemenu1', 'expand')">Expand All</a>
- &nbsp; <a href="javascript:ddtreemenu.flatten('treemenu1', 'contract')">Collapse All</a>
-</h4>
-
-<ul id="treemenu1" class="treeview">
-  <li>Tree 1 Item (hard-coded in HTML)</li>
-</ul>
-
-
-
-<h4>Simple Tree 2: &nbsp;
-<a href="javascript:ddtreemenu.flatten('treemenu2', 'expand')">Expand All</a>
- &nbsp; <a href="javascript:ddtreemenu.flatten('treemenu2', 'contract')">Collapse All</a>
-</h4>
-
-<ul id="treemenu2" class="treeview">
-  <li>Tree 2 Item (hard-coded in HTML)</li>
-</ul>
-
-
-
-<h4>Data Model Tree: &nbsp;
+<h3>Data Model Tree &nbsp; &nbsp; &nbsp;
 <a href="javascript:ddtreemenu.flatten('datamodel', 'expand')">Expand All</a>
  &nbsp; <a href="javascript:ddtreemenu.flatten('datamodel', 'contract')">Collapse All</a>
-</h4>
+</h3>
 
 <ul id="datamodel" class="treeview">
-  <li>Data Model (hard-coded in HTML)</li>
+  <!-- <li>Data Model (hard-coded into JavaScript source)</li> -->
 </ul>
 
 
@@ -244,132 +219,19 @@ console.log ( "\n\nTop of script in body section\n" );
 d = document;
 
 
-tm1 = document.getElementById("treemenu1");
-
-console.log( "After getting ... tm1.className = " + tm1.className + "\n" );
-
-tm1.className = "treeview";
-
-dyn_item_li = document.createElement("li");
-dyn_text = document.createTextNode("Item 1 (dynamic)");
-dyn_item_li.appendChild(dyn_text);
-tm1.appendChild(dyn_item_li);
-
-dyn_sublist_ul = document.createElement("ul");
-
-    dyn_subitem_li = document.createElement("li");
-    dyn_subtext = document.createTextNode("Sub Item 1 (dynamic)");
-    dyn_subitem_li.appendChild(dyn_subtext);
-    dyn_sublist_ul.appendChild(dyn_subitem_li);
-
-    dyn_subitem_li = document.createElement("li");
-    dyn_subtext = document.createTextNode("Sub Item 2 (dynamic)");
-    dyn_subitem_li.appendChild(dyn_subtext);
-    dyn_sublist_ul.appendChild(dyn_subitem_li);
-
-dyn_item_li.appendChild(dyn_sublist_ul);
-tm1.appendChild(dyn_item_li);
-
-
-dyn_item_li = document.createElement("li");
-dyn_text = document.createTextNode("Item 2 (dynamic)");
-dyn_item_li.appendChild(dyn_text);
-tm1.appendChild(dyn_item_li);
-
-
-dyn_item_li = document.createElement("li");
-dyn_text = document.createTextNode("Item 3 (dynamic)");
-dyn_item_li.appendChild(dyn_text);
-tm1.appendChild(dyn_item_li);
-
-
-console.log( "After building ... tm1.className = " + tm1.className + "\n" );
-
-
-
-
-
-tm2_ul = document.getElementById("treemenu2"); // This is a <ul> item
-
-console.log( "After getting ... tm2_ul.className = " + tm2_ul.className + "\n" );
-
-tm2_ul.className = "treeview";
-
-dyn_item_li = document.createElement("li");                   // This will be the parent of the sublist
-dyn_item_li.appendChild(document.createTextNode("Item 1 (dynamic)"));
-tm2_ul.appendChild(dyn_item_li);
-
-dyn_sublist_ul = document.createElement("ul");
-
-    dyn_subitem_li = document.createElement("li");
-    dyn_subitem_li.appendChild(document.createTextNode("Sub Item 1 (dynamic)"));
-    dyn_sublist_ul.appendChild(dyn_subitem_li);
-
-    dyn_subitem_li = document.createElement("li");                   // This will be the parent of the subsublist
-    dyn_subitem_li.appendChild(document.createTextNode("Sub Item 2 (dynamic)"));
-    dyn_sublist_ul.appendChild(dyn_subitem_li);
-
-    dyn_sub2list_ul = document.createElement("ul");
-
-        dyn_sub2item_li = document.createElement("li");
-        dyn_sub2item_li.appendChild(document.createTextNode("Sub 2 Item 1 (dynamic)"));
-        dyn_sub2list_ul.appendChild(dyn_sub2item_li);
-
-        dyn_sub2item_li = document.createElement("li");
-        dyn_sub2item_li.appendChild(document.createTextNode("Sub 2 Item 2 (dynamic)"));
-        dyn_sub2list_ul.appendChild(dyn_sub2item_li);
-
-        dyn_sub3list_ul = document.createElement("ul");
-
-            dyn_sub3item_li = document.createElement("li");
-            dyn_sub3item_li.appendChild(document.createTextNode("Sub 3 Item 1 (dynamic)"));
-            dyn_sub3list_ul.appendChild(dyn_sub3item_li);
-
-            dyn_sub3item_li = document.createElement("li");
-            dyn_sub3item_li.appendChild(document.createTextNode("Sub 3 Item 2 (dynamic)"));
-            dyn_sub3list_ul.appendChild(dyn_sub3item_li);
-
-        dyn_sub2item_li.appendChild(dyn_sub3list_ul);
-
-        dyn_sub2item_li = document.createElement("li");
-        dyn_sub2item_li.appendChild(document.createTextNode("Sub 2 Item 3 (dynamic)"));
-        dyn_sub2list_ul.appendChild(dyn_sub2item_li);
-
-    dyn_subitem_li.appendChild(dyn_sub2list_ul);
-
-    dyn_subitem_li = document.createElement("li");
-    dyn_subitem_li.appendChild(document.createTextNode("Sub Item 3 (dynamic)"));
-    dyn_sublist_ul.appendChild(dyn_subitem_li);
-
-dyn_item_li.appendChild(dyn_sublist_ul);
-tm2_ul.appendChild(dyn_item_li);
-
-
-dyn_item_li = document.createElement("li");
-dyn_item_li.appendChild(document.createTextNode("Item 2 (dynamic)"));
-tm2_ul.appendChild(dyn_item_li);
-
-
-dyn_item_li = document.createElement("li");
-dyn_item_li.appendChild(document.createTextNode("Item 3 (dynamic)"));
-tm2_ul.appendChild(dyn_item_li);
-
-
-console.log( "After building ... tm2_ul.className = " + tm2_ul.className + "\n" );
-
-
-
-
 data_model = { "mcell": {
-                 "cellblender_version": "0.1.54",
-                 "test_list":[11,22,33,44],
-                 "test_dict": {
+
+                 "TEST_LIST":[11,22,33,44, {"a":111, "b":222}],
+                 "TEST_DICT": {
                    "name": "Test Dictionary",
                    "sub_dict": {
-                     "k1":{"k1v1":"v1","k1v2":"v2"},
-                     "k2":{"k2v1":"v1", "k2v2":"v2"}
+                     "k1":{"k1v1":"v11","k1v2":12},
+                     "k2":{"k2v1":21, "k2v2":"v22"},
+                     "k3":[44, 33, 22, 11]
                    },
                  },
+
+                 "cellblender_version": "0.1.54",
                  "simulation_control": {
                    "name": "",
                    "processes_list": [
@@ -476,18 +338,18 @@ function build_elements_from_array ( arr, parent_ul, depth ) {
     if (typeof(arr[x]) != "object") {
       console.log ( indent + "  Scalar at index " + x + " is " + arr[x] + "\n" );
       // This is not an array or dictionary (both are "objects" in JavaScript)
-      item_text = document.createTextNode(" [" + x + "] = " + arr[x] + " is of type " + typeof(x) );
+      item_text = document.createTextNode(" [" + x + "] = \"" + arr[x] + "\" is of type " + typeof(arr[x]) );
       item_li.appendChild(item_text);
     } else {
       // An "object" can be an array or dictionary
       if (arr[x] instanceof Array) {  // Note that instanceof may not always work ... check for problems!!
-        item_text = document.createTextNode("Item at " + x + " is an array of length " + arr[x].length + "\n" );
+        item_text = document.createTextNode("Item at [" + x + "] is an array of length " + arr[x].length + "\n" );
         item_li.appendChild(item_text);
         sublist_ul = document.createElement("ul");
         build_elements_from_array ( arr[x], sublist_ul, depth+1 );
         item_li.appendChild(sublist_ul);
       } else {
-        item_text = document.createTextNode("Item at " + x + " is an object\n" );
+        item_text = document.createTextNode("Item at [" + x + "] is an object\n" );
         item_li.appendChild(item_text);
         sublist_ul = document.createElement("ul");
         build_elements_from_object ( arr[x], sublist_ul, depth+1 );
@@ -513,18 +375,18 @@ function build_elements_from_object ( obj, parent_ul, depth ) {
     if (typeof(obj[x]) != "object") {
       console.log ( indent + "  Scalar " + x + " is " + obj[x] + "\n" );
       // This is not an array or dictionary (both are "objects" in JavaScript)
-      item_text = document.createTextNode(x + " is \"" + obj[x] + "\" of type " + typeof(obj[x]) );
+      item_text = document.createTextNode("[" + x + "] is \"" + obj[x] + "\" of type " + typeof(obj[x]) );
       item_li.appendChild(item_text);
     } else {
       // An "object" can be an array or dictionary
       if (obj[x] instanceof Array) {  // Note that instanceof may not always work ... check for problems!!
-        item_text = document.createTextNode(x + " is an array of length " + obj[x].length + "\n" );
+        item_text = document.createTextNode("[" + x + "] is an array of length " + obj[x].length + "\n" );
         item_li.appendChild(item_text);
         sublist_ul = document.createElement("ul");
         build_elements_from_array ( obj[x], sublist_ul, depth+1 );
         item_li.appendChild(sublist_ul);
       } else {
-        item_text = document.createTextNode(x + " is an object\n" );
+        item_text = document.createTextNode("[" + x + "] is an object\n" );
         item_li.appendChild(item_text);
         sublist_ul = document.createElement("ul");
         build_elements_from_object ( obj[x], sublist_ul, depth+1 );
@@ -552,34 +414,11 @@ dyn_item_li.appendChild(dyn_sublist_ul);
 doc_dm.appendChild(dyn_item_li);
 
 
-
-ddtreemenu.createTree("treemenu1", true);
-ddtreemenu.createTree("treemenu2", true);
 ddtreemenu.createTree("datamodel", true);
-
-console.log( "After creating Trees ... tm2_ul.className = " + tm2_ul.className + "\n" );
 
 console.log ( "Bottom of script in body section\n" );
 
 </script>
-
-<!--
-  d = document
-  d.all
-  d.all[0]
-  tm1 = d.getElementById("treemenu1")
-  tm1.className
-  tm1.children
-  tm1.children.length
-  tm1.removeChild(tm1.children[0])
-  i0 = d.createElement("li")
-  t0 = d.createTextNode("Item 0")
-  i0.appendChild(t0)
-  tm1.insertBefore(i0,tm1.childNodes[0])
-
-  tm2 = document.getElementById("treemenu4")
-  
--->
 
 </body>
 </html>
