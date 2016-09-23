@@ -218,7 +218,9 @@ console.log ( "\n\nTop of script in body section\n" );
 
 d = document;
 
+// data_model = JSON.parse ( string );  // Use something like this when reading from a file or from a remote host
 
+// For now, use an internal version
 data_model = { "mcell": {
 
                  "TEST_LIST":[11,22,33,44, {"a":111, "b":222}],
@@ -349,7 +351,7 @@ function build_elements_from_array ( arr, parent_ul, depth ) {
         build_elements_from_array ( arr[x], sublist_ul, depth+1 );
         item_li.appendChild(sublist_ul);
       } else {
-        item_text = document.createTextNode("Item at [" + x + "] is an object\n" );
+        item_text = document.createTextNode("[" + x + "] is an object of length " + Object.keys(arr[x]).length + "\n" );
         item_li.appendChild(item_text);
         sublist_ul = document.createElement("ul");
         build_elements_from_object ( arr[x], sublist_ul, depth+1 );
@@ -386,7 +388,7 @@ function build_elements_from_object ( obj, parent_ul, depth ) {
         build_elements_from_array ( obj[x], sublist_ul, depth+1 );
         item_li.appendChild(sublist_ul);
       } else {
-        item_text = document.createTextNode("[" + x + "] is an object\n" );
+        item_text = document.createTextNode("[" + x + "] is an object of length " + Object.keys(obj[x]).length + "\n" );
         item_li.appendChild(item_text);
         sublist_ul = document.createElement("ul");
         build_elements_from_object ( obj[x], sublist_ul, depth+1 );
