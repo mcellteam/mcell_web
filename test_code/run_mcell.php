@@ -94,7 +94,7 @@ $output = "";
 if (strlen($what) > 0) {
   $sep = "=======================================================================================";
   if (strcmp($what,"clear") == 0) {
-    $output = "\n\n".$sep."\n  Directory Listing After Clear \n".$sep."\n\n".shell_exec ("rm -Rf viz_data; ls -lR");
+    $output = "\n\n".$sep."\n  Directory Listing After Clear \n".$sep."\n\n".shell_exec ("rm -Rf viz_data; rm -Rf react_data; ls -lR");
   } elseif (strcmp($what,"run") == 0) {
     if (strlen($model_name) > 0) {
       //$result = popen("/bin/ls", "r");
