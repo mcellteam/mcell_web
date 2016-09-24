@@ -122,6 +122,26 @@ if (strlen($what) > 0) {
   echo "Your browser does not support the HTML5 canvas tag.</canvas></center>";
 }
 */
+
+$plot_data = array ( 
+                 array (
+                     array(0,1,2,3,4,5,6,7),
+                     array(0,1,3,3,3,5,7,9)
+                 ),
+                 array (
+                     array(0,1,2,3,4,5,6,7),
+                     array(8,8,9,9,8,8,7,7)
+                 ),
+                 array (
+                     array(0,1,2,3,4,5,6,7),
+                     array(0,0,0,0,9,0,0,0)
+                 ),
+                 array (
+                     array(0,1,2,3,4,5,6,7),
+                     array(9,7,6,5,4,3,3,2)
+                 )
+             );
+
 ?>
 
 </form>
@@ -129,68 +149,67 @@ if (strlen($what) > 0) {
 
 <center>
 
-<h1>Parameterized Sine and Cosine</h1>
+<h1>Count Output Plot</h1>
 
 <canvas id="drawing_area" width="800" height="500" style="border:1px solid #d3d3d3;">
 Your browser does not support the HTML5 canvas tag.</canvas>
 <p/>
-<table>
-<tr>
-<td><input type="range" id="m" min="1" max="10" value="1" onchange="draw_curve()"></input></td>
-<td><input type="range" id="n" min="1" max="10" value="2" onchange="draw_curve()"></input></td>
-<td><input type="range" id="d" min="0.001" max="0.1" step=0.001 value="0.01" onchange="draw_curve()"></input></td>
-</tr>
-<tr>
-<td align="center"><span id="m_out"></span></td>
-<td align="center"><span id="n_out"></span></td>
-<td align="center"><span id="d_out"></span></td>
-</tr>
 </center>
-
 
 <script>
 
-function draw_curve() {
-    c = document.getElementById ( "drawing_area" );
-    w = c.width;
-    h = c.height;
-    xc = w/2;
-    yc = h/2;
-    out = document.getElementById("out");
-    m_slider = document.getElementById ( "m" );
-    n_slider = document.getElementById ( "n" );
-    d_slider = document.getElementById ( "d" );
+var plot_data = <?php echo json_encode($plot_data); ?>;
 
+// console.log ( plot_data );
 
-    m = 1 * m_slider.value;
-    n = 1 * n_slider.value;
-    delta = 1 * d_slider.value;
-    // delta = 0.01;
+function draw_data() {
 
-    document.getElementById("m_out").innerHTML = "m = " + m;
-    document.getElementById("n_out").innerHTML = "n = " + n;
-    document.getElementById("d_out").innerHTML = "d = " + delta;
+  var xmin=plot_data[0][0][0];
+  var xmax=plot_data[0][0][0];
+  var ymin=plot_data[0][1][0];
+  var ymax=plot_data[0][1][0];
 
-    var ctx = c.getContext("2d");
-    ctx.fillStyle = "#eeeeee";
-    ctx.fillRect(0,0,w,h);
+  for (var pd=0; pd<plot_data.length; pd++) {
+    for (var i=0; i<plot_data[pd][0].length; i++) {
+      x = plot_data[pd][0][i];
+      y = plot_data[pd][1][i];
+      if (x < xmin) xmin = x;
+      if (x > xmax) xmax = x;
+      if (y < ymin) ymin = y;
+      if (y > ymax) ymax = y;
+    }
+  }
 
+  c = document.getElementById ( "drawing_area" );
+  w = c.width;
+  h = c.height;
+  
+  var ctx = c.getContext("2d");
+  ctx.fillStyle = "#eeeeee";
+  ctx.fillRect(0,0,w,h);
+
+  for (var pd=0; pd<plot_data.length; pd++) {
+    console.log ( "New Plot" );
     ctx.beginPath();
-    for (p=0; p<delta+(2*Math.PI); p+=delta) {
-      x = Math.sin(p*m);
-      y = Math.sin(p*n);
-      x = xc + (xc*x);
-      y = yc + (yc*y);
-      if (p==0) {
+    for (var i=0; i<plot_data[pd][0].length; i++) {
+      x = plot_data[pd][0][i];
+      y = plot_data[pd][1][i];
+      console.log ( "  point " + x + "," + y );
+      x = w * (x-xmin) / (xmax-xmin);
+      y = h * (y-ymin) / (ymax-ymin);
+      y = h - y;
+      if (i==0) {
         ctx.moveTo(x,y);
       } else {
         ctx.lineTo(x,y);
       }
     }
     ctx.stroke();
+  }
+
 }
 
-draw_curve()
+draw_data();
 
 </script>
 
