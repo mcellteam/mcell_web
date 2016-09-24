@@ -47,7 +47,9 @@ echo " &nbsp; &nbsp; <input type=\"submit\" value=\"Run MCell\">";
 if (strlen($model_name) > 0) {
   //$result = popen("/bin/ls", "r");
   echo "<br/><b>MCell output ...</b>";
-  $output = shell_exec("./mcell -seed ".$seed." Scene.main.mdl");
+  $sep = "=======================================================================================";
+  $output = shell_exec ("ls -lR ..; echo \" \"; echo ".$sep."; echo \" \"; ./mcell -seed ".$seed." Scene.main.mdl");
+  //$output = shell_exec("./mcell -seed ".$seed." Scene.main.mdl");
   echo "<div class=\"center\"><table><tr><td><pre>$output</pre></td></tr></table></div>";
 }
 ?>
