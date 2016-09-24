@@ -123,24 +123,139 @@ if (strlen($what) > 0) {
 }
 */
 
+/*
+
+$seed_folders = glob("react_data/*");
+
+$plot_data = array_fill ( 0, count($seed_folders), array ( array(0,1), array(0,1) ) );
+for ($seed_folder_index=0; $seed_folder_index<count($seed_folders); $seed_folder_index++) {
+  echo "Seed Folders = ".$seed_folders[$seed_folder_index]."<br/>";
+  $seed_files = glob($seed_folders[$seed_folder_index]."/*");
+  $plot_data[$seed_folder_index] = array_fill ( 0, count($seed_files), array(0,1) );
+  for ($seed_file_index=0; $seed_file_index<count($seed_files); $seed_file_index++) {
+    $seed_file_lines = explode ( "\n", file_get_contents ( $seed_files[$seed_file_index] ) );
+    $num_lines = count($seed_file_lines);
+
+
+
+    echo " &nbsp;  &nbsp;  &nbsp; Seed File contains ".$num_lines." lines.<br/>";
+    $plot_data[$seed_folder_index][$seed_file_index][0] = array_fill ( 0, $num_lines, 0 );
+    $plot_data[$seed_folder_index][$seed_file_index][1] = array_fill ( 0, $num_lines, 0 );
+    for ($seed_line_index=0; $seed_line_index<$num_lines; $seed_line_index++) {
+      // echo " &nbsp;  &nbsp;  &nbsp;  &nbsp; ".$seed_line_parts[0].", ".$seed_line_parts[1]."<br/>";
+      $seed_line_parts = explode ( " ", trim($seed_file_lines[$seed_line_index]) );
+      // Good here: echo " &nbsp;  &nbsp;  &nbsp;  &nbsp; ".$seed_line_parts[0].", ".$seed_line_parts[1]."<br/>";
+      $x = 0;
+      $y = 0;
+      if (count($seed_line_parts) == 2) {
+        $x = floatval(trim($seed_line_parts[0]));
+        $y = floatval(trim($seed_line_parts[1]));
+      }
+      $plot_data[$seed_folder_index][$seed_file_index][0][$seed_line_index] = $x;
+      $plot_data[$seed_folder_index][$seed_file_index][1][$seed_line_index] = $y;
+      echo " &nbsp;  &nbsp;  &nbsp;  &nbsp; ".$x.", ".$y."<br/>";
+    }
+  }
+}
+
+
+*/
+
+/*
 $plot_data = array ( 
                  array (
-                     array(0,1,2,3,4,5,6,7),
-                     array(0,1,3,3,3,5,7,9)
+                     array(0.1,1.1,2.1,3.1,4.1,5.1,6.1,7.1),
+                     array(0.1,1.1,3.1,3.1,3.1,5.1,7.1,9.1)
                  ),
                  array (
-                     array(0,1,2,3,4,5,6,7),
-                     array(8,8,9,9,8,8,7,7)
+                     array(0.1,1.1,2.1,3.1,4.1,5.1,6.1,7.1),
+                     array(8.1,8.1,9.1,9.1,8.1,8.1,7.1,7.1)
                  ),
                  array (
-                     array(0,1,2,3,4,5,6,7),
-                     array(0,0,0,0,9,0,0,0)
+                     array(0.1,1.1,2.1,3.1,4.1,5.1,6.1,7.1),
+                     array(0.1,0.1,0.1,0.1,9.1,0.1,0.1,0.1)
                  ),
                  array (
-                     array(0,1,2,3,4,5,6,7),
-                     array(9,7,6,5,4,3,3,2)
+                     array(0.1,1.1,2.1,3.1,4.1,5.1,6.1,7.1),
+                     array(9.1,7.1,6.1,5.1,4.1,3.1,3.1,2.1)
                  )
              );
+*/
+
+$plot_data = array ();
+for ($i=0;$i<4;$i++) {
+  $plot_data[$i] = array();
+  for ($j=0;$j<2;$j++) {
+    $plot_data[$i][$j] = array();
+    for ($k=0;$k<8;$k++) {
+      $x = $k;
+      if ($j > 0) {
+        $x = (5*$i) + ($k * $k);
+      }
+      $plot_data[$i][$j][$k] = $x;
+    }
+  }
+}
+
+
+
+$plot_data = array();
+$plot_file_num = 0;
+
+$seed_folders = glob("react_data/*");
+for ($seed_folder_index=0; $seed_folder_index<count($seed_folders); $seed_folder_index++) {
+  echo "Seed Folder = ".$seed_folders[$seed_folder_index]."<br/>";
+
+  $mol_files = glob($seed_folders[$seed_folder_index]."/*");
+
+  for ($mol_file_index=0; $mol_file_index<count($mol_files); $mol_file_index++) {
+
+    $plot_data[$plot_file_num] = array();
+    $plot_data[$plot_file_num][0] = array();
+    $plot_data[$plot_file_num][1] = array();
+
+    $seed_file_lines = explode ( "\n", file_get_contents ( $mol_files[$mol_file_index] ) );
+    $num_lines = count($seed_file_lines);
+
+    echo " &nbsp;  &nbsp;  &nbsp; Seed File contains ".$num_lines." lines.<br/>";
+
+    $plot_line_num = 0;
+    for ($seed_line_index=0; $seed_line_index<$num_lines; $seed_line_index++) {
+
+      // echo " &nbsp;  &nbsp;  &nbsp;  &nbsp; ".$seed_line_parts[0].", ".$seed_line_parts[1]."<br/>";
+      $seed_line_parts = explode ( " ", trim($seed_file_lines[$seed_line_index]) );
+      // echo " &nbsp;  &nbsp;  &nbsp;  &nbsp; ".$seed_line_parts[0].", ".$seed_line_parts[1]."<br/>";
+      if (count($seed_line_parts) == 2) {
+        $x = floatval(trim($seed_line_parts[0]));
+        $y = floatval(trim($seed_line_parts[1]));
+        $plot_data[$plot_file_num][0][$plot_line_num] = $x;
+        $plot_data[$plot_file_num][1][$plot_line_num] = $y;
+        $plot_line_num = $plot_line_num + 1;
+      }
+      // echo " &nbsp;  &nbsp;  &nbsp;  &nbsp; ".$x.", ".$y."<br/>";
+    }
+
+    $plot_file_num = $plot_file_num + 1;
+
+  }
+}
+
+
+// Dump the plot data
+
+for ($ver1=0; $ver1<count($plot_data); $ver1++) {
+  echo "<br/>";
+  for ($ver2=0; $ver2<count($plot_data[$ver1]); $ver2++) {
+    echo "<br/>";
+    for ($ver3=0; $ver3<count($plot_data[$ver1][$ver2]); $ver3++) {
+      $coord = "x";
+      if ($ver2 != 0) {
+        $coord = "y";
+      }
+      echo " &nbsp;  &nbsp; ".$coord." [".$ver1."][".$ver2."][".$ver3."] = ".$plot_data[$ver1][$ver2][$ver3]."<br/>";
+    }
+  }
+}
 
 ?>
 
