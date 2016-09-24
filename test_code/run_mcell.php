@@ -11,8 +11,8 @@
 
 /* Body for the entire document */
 body {
-  background-color: #eeeeee	;  /* Web-Safe Light Blue is ccccff */
-  color: #000066;  /* Text Color - Web-Safe Dark Blue is 000066 */
+  background-color: #eeeeee;
+  color: #000066;
   margin-left: 10px;
   margin-right: 10px;
   margin-top: 10px;
@@ -37,13 +37,18 @@ $model_name = "";
 if (in_array("model_name",array_keys($_POST))) {
   $model_name = $_POST["model_name"];
 }
+$seed = 1;
+if (in_array("seed",array_keys($_POST))) {
+  $seed = $_POST["seed"];
+}
 echo "<b>Model Name:</b> &nbsp; <input type=\"text\" name=\"model_name\" value=".$model_name.">";
-echo "<input type=\"submit\" value=\"Run MCell\">";
+echo " &nbsp; &nbsp; <b>Seed:</b> &nbsp; <input type=\"text\" name=\"seed\" value=".$seed.">";
+echo " &nbsp; &nbsp; <input type=\"submit\" value=\"Run MCell\">";
 if (strlen($model_name) > 0) {
   //$result = popen("/bin/ls", "r");
-  echo "<br/><b>MCell is running ...</b>";
-  $output = shell_exec("./mcell -seed 2 Scene.main.mdl");
-  echo "<pre>$output</pre>";
+  echo "<br/><b>MCell output ...</b>";
+  $output = shell_exec("./mcell -seed ".$seed." Scene.main.mdl");
+  echo "<div class=\"center\"><table><tr><td><pre>$output</pre></td></tr></table></div>";
 }
 ?>
 </form>
