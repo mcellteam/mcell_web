@@ -185,11 +185,13 @@ function draw_data() {
   h = c.height;
   
   var ctx = c.getContext("2d");
-  ctx.fillStyle = "#eeeeee";
+  ctx.fillStyle = "#000000";
   ctx.fillRect(0,0,w,h);
 
   for (var pd=0; pd<plot_data.length; pd++) {
     console.log ( "New Plot" );
+    var colors = [ "#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff", "#00ffff" ];
+    ctx.strokeStyle = colors[pd%colors.length];
     ctx.beginPath();
     for (var i=0; i<plot_data[pd][0].length; i++) {
       x = plot_data[pd][0][i];
@@ -198,6 +200,8 @@ function draw_data() {
       x = w * (x-xmin) / (xmax-xmin);
       y = h * (y-ymin) / (ymax-ymin);
       y = h - y;
+      x = (0.05*w) + (0.9*x);
+      y = (0.05*h) + (0.9*y);
       if (i==0) {
         ctx.moveTo(x,y);
       } else {
