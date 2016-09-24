@@ -1,0 +1,137 @@
+/* Default Style Sheet */
+
+
+/* HTML for the entire document */
+html {
+  font-size: 16px;
+  text-indent: 0px;
+  font-family: verdana, helvetica, arial, sans-serif;
+}
+
+
+/* Body for the entire document */
+body {
+  background-color: #888888	;  /* Web-Safe Light Blue is ccccff */
+  color: #000066;  /* Text Color - Web-Safe Dark Blue is 000066 */
+  margin-left: 0px;
+  margin-right: 0px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+/* Pane classes */
+.leftside {
+  margin: 10px;
+  background-color: #aaaaaa;
+}
+.rightside {
+  margin: 10px;
+  background-color: #cccccc;
+}
+
+/* Headings */
+
+h1 {
+  font-size: 140%;
+  font-weight: bold;
+}
+
+h2 {
+  font-size: 110%;
+  font-weight: bold;
+}
+
+
+/* Regular Text */
+
+.indent1 {
+  text-indent: 0px;
+  margin-left: 10px;
+}
+
+.indent2 {
+  text-indent: 0px;
+  margin-left: 20px;
+}
+
+strong {
+  font-weight: bold;
+  font-size: 104%;
+}
+
+/* Global Classes */
+.bright {
+  background-color: #ffffff;
+}
+
+/* Special Text Classes */
+.highlight {
+  background-color: #ffff88;
+}
+
+/* Division and Span Classes */
+div.regular {
+  background-color: #888888;
+}
+
+/* Span Classes */
+span.regular {
+  background-color: #888888;
+}
+
+
+/* Links */
+a:link {
+  text-decoration: none;
+  color: #bb0000;
+  background-color: inherit;
+}
+
+a:hover {
+  color: #ff4444;
+  background-color: inherit;
+}
+
+a:visited {
+  text-decoration: none;
+  color: #aa00aa;
+  background-color: inherit;
+}
+
+/* For the current page - especially useful for frame index pages! */
+a:active {
+  text-decoration: none;
+  /* color: inherit; */
+  color: #8800ee;
+  /* color: #ff4444; */
+  background-color: inherit;
+}
+
+/* Tables */
+
+table {
+  /* background-color: #888888; */
+  border: 0;
+}
+
+td {
+  font-weight: bold;
+  margin: 100px;
+}
+
+/* Images */
+img {
+  // border: 4, #8888cc;
+  border-style: none; // ridge groove solid inset outset double none dotted dashed
+}
+
+.zeromargins {
+  margin-left: 0px;
+  margin-right: 0px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  cellpadding: 10px;
+  cellspacing: 10px;
+}
+
+/* End of Style Sheet */
