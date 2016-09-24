@@ -12,7 +12,7 @@
 <center><img class="zeromargins" src="share/rat_nmj.jpg" width="100%"></center>
 </div>
 
-<table class="zeromargins" width="100%" border="0">
+<table class="zeromargins" width="100%" height="100%" border="0">
  <colgroup>
   <col width="20%" />
   <col />
@@ -52,30 +52,6 @@ Currently running a LAMP server...
 <!----------------------------------------------------------------->
 <!-- This is just a way of extending the main page so it fills the window vertically -->
 <pre>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 </pre>
 </div>
