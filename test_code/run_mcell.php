@@ -50,6 +50,14 @@ table, th, td {
   margin-bottom: 10px;
   /* border-collapse: collapse; */
 }
+
+.hidden {
+  display: none;
+}
+.visible {
+  display: block;
+}
+
 </style>
 
 
@@ -83,6 +91,10 @@ $what = "";
 if (in_array("what",array_keys($_POST))) {
   $what = $_POST["what"];
 }
+$show_text = 0;
+if (in_array("show_text",array_keys($_POST))) {
+  $show_text = $_POST["show_text"];
+}
 
 if ($start_seed < 1) {
   $start_seed = 1;
@@ -107,11 +119,11 @@ for ($model_file_index=0; $model_file_index<count($model_files); $model_file_ind
 }
 echo "</select>\n";
 
-//echo "<b>Model Name:</b> &nbsp; <input type=\"text\" name=\"model_name\" value=".$model_name.">";
 echo " &nbsp; &nbsp; <b>Seeds:</b> &nbsp; <input type=\"text\" size=\"4\" min=\"1\" max=\"2000\" name=\"start_seed\" value=".$start_seed.">\n";
 echo " &nbsp; to &nbsp;                   <input type=\"text\" size=\"4\" min=\"1\" max=\"2000\" name=\"end_seed\" value=".$end_seed.">\n";
 echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"run\">Run MCell</button>\n";
 echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"clear\">Clear</button>\n";
+
 $output = "";
 if (strlen($what) > 0) {
   $sep = "=======================================================================================";
@@ -120,7 +132,6 @@ if (strlen($what) > 0) {
   } elseif (strcmp($what,"run") == 0) {
     if (strlen($model_file_name) > 0) {
       //$result = popen("/bin/ls", "r");
-      echo "<br/><p><b>MCell output:</b></p>";
       $output = "";
       $result = "";
       for ($seed = $start_seed; $seed <= $end_seed; $seed++) {
@@ -137,8 +148,6 @@ if (strlen($what) > 0) {
   }
 }
 echo "</center>";
-
-echo "<center><table><tr><td><pre>$output</pre></td></tr></table></center>";
 
 
 $plot_data = array();
@@ -190,14 +199,34 @@ for ($seed_folder_index=0; $seed_folder_index<count($seed_folders); $seed_folder
 
 <center>
 
+<br/>
+
 <h1>Count Output Plot</h1>
 
 <canvas id="drawing_area" width="800" height="600" style="border:1px solid #d3d3d3;">
 Your browser does not support the HTML5 canvas tag.</canvas>
 <p/>
+
+<br/><button id="show_hide_control" onclick="toggle_mcell_output()"><b>Show MCell Text Output</b></button>
+
+<center id="mcellout" class="hidden"><table><tr><td><pre><?php echo $output; ?></pre></td></tr></table></center>
+
 </center>
 
 <script>
+
+function toggle_mcell_output() {
+  // console.log ( "toggle mcell output!!" );
+  mco = document.getElementById("mcellout");
+  sh = document.getElementById("show_hide_control")
+  if (mco.getAttribute('class') == "visible") {
+    mco.setAttribute('class', 'hidden');
+    sh.innerHTML = "<b>Show MCell Text Output</b>";
+  } else if (mco.getAttribute('class') == "hidden") {
+    mco.setAttribute('class', 'visible');
+    sh.innerHTML = "<b>Hide MCell Text Output</b>";
+  }
+}
 
 // PHP will have filled in the $plot_data variable with the plot data (above).
 // This next line generates an in-line JavaScript statement containing all of that data.
@@ -245,7 +274,7 @@ function draw_data() {
     for (var i=0; i<plot_data[pd][0].length; i++) {
       x = plot_data[pd][0][i];
       y = plot_data[pd][1][i];
-      console.log ( "  point " + x + "," + y );
+      // console.log ( "  point " + x + "," + y );
       x = w * (x-xmin) / (xmax-xmin);
       y = h * (y-ymin) / (ymax-ymin);
       y = h - y;

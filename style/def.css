@@ -121,8 +121,8 @@ td {
 
 /* Images */
 img {
-  // border: 4, #8888cc;
-  border-style: none; // ridge groove solid inset outset double none dotted dashed
+  /* border: 4, #8888cc; */
+  border-style: none; /* ridge groove solid inset outset double none dotted dashed */
 }
 
 .zeromargins {
@@ -130,8 +130,9 @@ img {
   margin-right: 0px;
   margin-top: 0px;
   margin-bottom: 0px;
-  cellpadding: 10px;
-  cellspacing: 10px;
+  /* cellpadding: 10px; */
+  /* cellspacing: 10px; */
 }
 
 /* End of Style Sheet */
+
