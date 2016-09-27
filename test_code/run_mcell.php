@@ -224,6 +224,10 @@ function draw_data() {
       if (y > ymax) ymax = y;
     }
   }
+  if (ymin == ymax) {
+    ymax +=  1;
+    ymin += -1;
+  }
 
   c = document.getElementById ( "drawing_area" );
   w = c.width;
