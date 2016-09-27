@@ -128,7 +128,9 @@ $output = "";
 if (strlen($what) > 0) {
   $sep = "=======================================================================================";
   if (strcmp($what,"clear") == 0) {
-    $output = "\n\n".$sep."\n  Directory Listing After Clear \n".$sep."\n\n".shell_exec ("rm -Rf viz_data; rm -Rf react_data; ls -lR");
+    // $output = "\n\n".$sep."\n  Directory Listing After Clear \n".$sep."\n\n".shell_exec ("rm -Rf viz_data; rm -Rf react_data; ls -lR");
+    shell_exec ("rm -Rf viz_data; rm -Rf react_data; ls -lR");
+    $output = "\n";
   } elseif (strcmp($what,"run") == 0) {
     if (strlen($model_file_name) > 0) {
       //$result = popen("/bin/ls", "r");
@@ -142,8 +144,8 @@ if (strlen($what) > 0) {
           $output = $output."\n\n".$sep."\n\n".$result;
         }
       }
-      $result = shell_exec ("ls -lR;");
-      $output = $output."\n\n".$sep."\n  Directory Listing After All Runs \n".$sep."\n\n".$result;
+      // $result = shell_exec ("ls -lR;");
+      // $output = $output."\n\n".$sep."\n  Directory Listing After All Runs \n".$sep."\n\n".$result;
     }
   }
 }

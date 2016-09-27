@@ -19,8 +19,8 @@
  </colgroup>
  <tr valign="top">
   <td class="leftside">
-   <p class="leftside"><a href="test_code/data_model_testing.htm">Data Model Browser</a></p>
    <p class="leftside"><a href="test_code/run_mcell.php">Run MCell</a></p>
+   <p class="leftside"><a href="test_code/data_model_testing.htm">Data Model Browser</a></p>
    <p class="leftside"><a href="mysql-edit.php">Database Administration</a></p>
    <p class="leftside"><a href="test_code/php_show_info.php">PHP Information</a></p>
   </td>
