@@ -103,12 +103,15 @@ def write_mdl ( dm, file_name ):
     # f.write ( "/* MDL Generated from Data Model */\n" )
     if ('mcell' in dm):
       mcell = dm['mcell']
+      dt = "1e-6"
       if 'parameter_system' in mcell:
         ps = mcell['parameter_system']
         write_parameter_system ( ps, f )
       if 'initialization' in mcell:
         init = mcell['initialization']
         write_initialization ( init, f )
+        if "time_step" in init:
+          dt = init["time_step"]
         if 'partitions' in init:
           parts = mcell['initialization']['partitions']
           write_partitions ( parts, f )
@@ -153,7 +156,7 @@ def write_mdl ( dm, file_name ):
         mols = None
         if ('define_molecules' in mcell):
           mols = mcell['define_molecules']
-        write_react_out ( reactout, mols, f )
+        write_react_out ( reactout, dt, f )
 
     f.close()
 
@@ -542,7 +545,7 @@ def write_viz_out ( vizout, mols, f ):
       f.write ( "\n" );
 
 
-def write_react_out ( rout, mols, f ):
+def write_react_out ( rout, dt, f ):
 
     context_scene_name = "Scene"
 
@@ -552,9 +555,13 @@ def write_react_out ( rout, mols, f ):
       if len(rout["output_buf_size"].strip()) > 0:
         f.write("  OUTPUT_BUFFER_SIZE=%s\n" % (rout['output_buf_size']))
 
+    step_cmd = ""
     if "rxn_step" in rout:
       if len(rout["rxn_step"]) > 0:
-        f.write("  STEP=%s\n" % (rout['rxn_step']))
+        step_cmd = "  STEP=%s\n" % ( rout['rxn_step'] )
+    if len(step_cmd) <= 0:
+      step_cmd = "  STEP=%s\n" % ( dt )
+    f.write(step_cmd)
 
     always_generate = False
     if "always_generate" in rout:

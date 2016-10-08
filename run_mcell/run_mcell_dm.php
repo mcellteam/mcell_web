@@ -1,13 +1,12 @@
 <html>
 
 <head>
-<title>MCell Web Development - Run MCell</title>
+<title>MCell Web Development - Run MCell Data Model</title>
 <link rel="stylesheet" type="text/css" href="../style/def.css" />
 </head>
 
 <body>
 
-<a href="../.."> <b>Home</b> </a>
 <hr/>
 
 <style type="text/css">
@@ -61,7 +60,7 @@ table, th, td {
 </style>
 
 
-<?php echo '<center><h1>MCell Web Development at mcell.snl.salk.edu</h1></center>'; ?>
+<?php echo '<center><h1><a href="../..">MCell Web Development at mcell.snl.salk.edu</a></h1></center>'; ?>
 
 <hr/>
 
@@ -106,9 +105,9 @@ if ($end_seed < $start_seed) {
   $end_seed = $start_seed;
 }
 
-$model_files = glob("*.txt");
+$model_files = glob("data_model_files/*.txt");
 
-echo "<b>Model Name:</b> &nbsp; <select name=\"model_file_name\">\n";
+echo "<b>Data Model Name:</b> &nbsp; <select name=\"model_file_name\">\n";
 echo "  <option value=\"\"></option>>";
 for ($model_file_index=0; $model_file_index<count($model_files); $model_file_index++) {
   $sel = "";
@@ -134,11 +133,15 @@ if (strlen($what) > 0) {
   } elseif (strcmp($what,"run") == 0) {
     if (strlen($model_file_name) > 0) {
       //$result = popen("/bin/ls", "r");
-      $result = shell_exec ("python data_model_to_mdl.py ".$model_file_name." data_model.mdl");
-      $output = $result;
+      $output = "";
+      $result = "";
       for ($seed = $start_seed; $seed <= $end_seed; $seed++) {
-        $result = shell_exec ("./mcell -seed ".$seed." data_model.mdl; echo \" \"; echo ".$sep."; echo \" \";");
-        $output = $output."\n\n".$sep."\n\n".$result;
+        $dm_out = shell_exec ("python data_model_to_mdl.py ".$model_file_name." mdl_files/data_model.mdl");
+        $output = $output."\n\n".$sep."\n".$dm_out.$sep."\n";
+        $mcell_command = "./mcell -seed ".$seed." mdl_files/data_model.mdl";
+        $output = $output."\n\n".$sep."\n    ".$mcell_command."\n".$sep."\n";
+        $result = shell_exec ($mcell_command);
+        $output = $output.$result."\n\n";
       }
       // $result = shell_exec ("ls -lR;");
       // $output = $output."\n\n".$sep."\n  Directory Listing After All Runs \n".$sep."\n\n".$result;

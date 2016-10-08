@@ -1,13 +1,12 @@
 <html>
 
 <head>
-<title>MCell Web Development - Run MCell</title>
+<title>MCell Web Development - Run MCell MDL</title>
 <link rel="stylesheet" type="text/css" href="../style/def.css" />
 </head>
 
 <body>
 
-<a href="../.."> <b>Home</b> </a>
 <hr/>
 
 <style type="text/css">
@@ -61,7 +60,7 @@ table, th, td {
 </style>
 
 
-<?php echo '<center><h1>MCell Web Development at mcell.snl.salk.edu</h1></center>'; ?>
+<?php echo '<center><h1><a href="../..">MCell Web Development at mcell.snl.salk.edu</a></h1></center>'; ?>
 
 <hr/>
 
@@ -108,7 +107,7 @@ if ($end_seed < $start_seed) {
 
 $model_files = glob("mdl_files/*.mdl");
 
-echo "<b>Model Name:</b> &nbsp; <select name=\"model_file_name\">\n";
+echo "<b>MDL Name:</b> &nbsp; <select name=\"model_file_name\">\n";
 echo "  <option value=\"\"></option>>";
 for ($model_file_index=0; $model_file_index<count($model_files); $model_file_index++) {
   $sel = "";
