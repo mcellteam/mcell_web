@@ -499,11 +499,11 @@ def write_release_patterns ( pats, f ):
         for p in plist:
           f.write ( "DEFINE_RELEASE_PATTERN %s\n" % (p['name']) )
           f.write ( "{\n" )
-          f.write ( "  DELAY = %s\n" % (p['delay']) )
-          f.write ( "  RELEASE_INTERVAL = %s\n" % (p['release_interval']) )
-          f.write ( "  TRAIN_DURATION = %s\n" % (p['train_duration']) )
-          f.write ( "  TRAIN_INTERVAL = %s\n" % (p['train_interval']) )
-          f.write ( "  NUMBER_OF_TRAINS = %s\n" % (p['number_of_trains']) )
+          if len(p['delay']) > 0:            f.write ( "  DELAY = %s\n" % (p['delay']) )
+          if len(p['release_interval']) > 0: f.write ( "  RELEASE_INTERVAL = %s\n" % (p['release_interval']) )
+          if len(p['train_duration']) > 0:   f.write ( "  TRAIN_DURATION = %s\n" % (p['train_duration']) )
+          if len(p['train_interval']) > 0:   f.write ( "  TRAIN_INTERVAL = %s\n" % (p['train_interval']) )
+          if len(p['number_of_trains']) > 0: f.write ( "  NUMBER_OF_TRAINS = %s\n" % (p['number_of_trains']) )
           f.write ( "}\n" )
           f.write("\n")
 
