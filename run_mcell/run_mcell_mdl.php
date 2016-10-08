@@ -65,7 +65,7 @@ table, th, td {
 
 <hr/>
 
-<form action="run_mcell.php" method="post">
+<form action="run_mcell_mdl.php" method="post">
 
 <?php
 
