@@ -126,7 +126,7 @@ td {
 /* Images */
 img {
   /* border: 4, #8888cc; */
-  border-style: none; // ridge groove solid inset outset double none dotted dashed
+  border-style: none; /* ridge groove solid inset outset double none dotted dashed */
 }
 
 .zeromargins {
@@ -134,8 +134,8 @@ img {
   margin-right: 0px;
   margin-top: 0px;
   margin-bottom: 0px;
-  cellpadding: 10px;
-  cellspacing: 10px;
+  /* cellpadding: 10px; */
+  /* cellspacing: 10px; */
 }
 
 
@@ -334,7 +334,39 @@ console.log ( "Bottom of script in head section\n" );
 
 <body>
 
-<a href="../.."> <b>Home</b> </a>
+<form action="data_model_browser.php" method="post">
+
+<a href="../.."> <b>Home</b> </a> &nbsp; &nbsp; &nbsp; &nbsp;
+
+<?php
+
+
+$model_file_name = "";
+if (in_array("model_file_name",array_keys($_POST))) {
+  $model_file_name = $_POST["model_file_name"];
+}
+
+$model_files = glob("data_model_files/*.json");
+
+echo "<b>Data Model Name:</b> &nbsp; <select id=\"data_model_name_id\" name=\"model_file_name\">\n";
+echo "  <option value=\"\"></option>>";
+for ($model_file_index=0; $model_file_index<count($model_files); $model_file_index++) {
+  $sel = "";
+  if ($model_files[$model_file_index] == $model_file_name) {
+    $sel = " selected ";
+  }
+  echo "  <option ".$sel."value=".$model_files[$model_file_index].">".$model_files[$model_file_index]."</option>\n";
+}
+echo "</select>\n";
+
+echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"load\">Load</button>\n";
+
+?>
+
+
+</form>
+
+
 <hr/>
 
 <h1>CellBlender Data Model Tree</h1>
@@ -462,6 +494,10 @@ console.log ( "\n\nData Model version is " + data_model["mcell"]["cellblender_ve
 var source_filename = window.location.href;
 var source_path = source_filename.substring(0,source_filename.lastIndexOf("/"));
 var json_file = source_path + "/" + "data_model.json";
+
+json_file = source_path + "/" + document.getElementById("data_model_name_id").value;
+console.log ( "Opening: " + json_file );
+
 var xmlhttp = new XMLHttpRequest();
 var url = json_file;
 xmlhttp.onreadystatechange=function() {
