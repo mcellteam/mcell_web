@@ -176,8 +176,31 @@ if (strlen($what) > 0) {
       //$result = popen("/bin/ls", "r");
       $output = "";
       $result = "";
+      // Re-read the data model
+      $json_string = file_get_contents ( $model_file_name );
+      $data_model = json_decode ( $json_string, true );
+      // Get the parameters
+      $pars = $data_model["mcell"]["parameter_system"]["model_parameters"];
+      // Change the parameters
+      $npars = count($pars);
+      for ($i=0; $i<$npars; $i++) {
+        if (strcmp($pars[$i]["par_name"],"dr") == 0) {
+          $data_model["mcell"]["parameter_system"]["model_parameters"][$i]["par_expression"] = "1e3";
+        }
+      }
+      /* This didn't work
+      foreach ($pars as &$par) {
+        if (strcmp($par["par_name"],"dr") == 0) {
+          $par["par_expression"] = "0";
+        }
+      }
+      unset($par);
+      */
+      // Encode the data model as JSON and write it to the file
+      $json_output = json_encode ( $data_model );
+      file_put_contents ( "mdl_files/data_model.json", $json_output );
       for ($seed = $start_seed; $seed <= $end_seed; $seed++) {
-        $dm_out = shell_exec ("python data_model_to_mdl.py ".$model_file_name." mdl_files/data_model.mdl");
+        $dm_out = shell_exec ("python data_model_to_mdl.py mdl_files/data_model.json mdl_files/data_model.mdl");
         $output = $output."\n\n".$sep."\n".$dm_out.$sep."\n";
         $mcell_command = "./mcell -seed ".$seed." mdl_files/data_model.mdl";
         $output = $output."\n\n".$sep."\n    ".$mcell_command."\n".$sep."\n";
