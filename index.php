@@ -21,7 +21,7 @@
   <td class="leftside">
    <p class="leftside"><a href="run_mcell/run_mcell.php">Run MCell from MDL File</a></p>
    <p class="leftside"><a href="run_mcell/run_mcell_dm.php">Run MCell from Data Model</a></p>
-   <p class="leftside"><a href="run_mcell/data_model_testing.htm">Data Model Browser</a></p>
+   <p class="leftside"><a href="run_mcell/data_model_browser.php">Data Model Browser</a></p>
    <p class="leftside"><a href="mysql-edit.php">Database Administration</a></p>
    <p class="leftside"><a href="run_mcell/php_show_info.php">PHP Information</a></p>
   </td>
