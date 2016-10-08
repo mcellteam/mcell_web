@@ -105,7 +105,8 @@ if ($end_seed < $start_seed) {
   $end_seed = $start_seed;
 }
 
-$model_files = glob("data_model_files/*.txt");
+$json_string = "";
+$model_files = glob("data_model_files/*.json");
 
 echo "<p>";
 echo "<b>Data Model Name:</b> &nbsp; <select name=\"model_file_name\">\n";
@@ -124,10 +125,6 @@ echo "<p>";
 echo " &nbsp; &nbsp; <b>Seed Range:</b> &nbsp; <input type=\"text\" size=\"4\" min=\"1\" max=\"2000\" name=\"start_seed\" value=".$start_seed.">\n";
 echo " &nbsp; to &nbsp;                        <input type=\"text\" size=\"4\" min=\"1\" max=\"2000\" name=\"end_seed\" value=".$end_seed.">\n";
 echo "</p>";
-echo "<p>";
-echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"run\">Run MCell</button>\n";
-echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"clear\">Clear</button>\n";
-echo "</p>";
 
 $output = "";
 if (strlen($what) > 0) {
@@ -137,7 +134,23 @@ if (strlen($what) > 0) {
     shell_exec ("rm -Rf viz_data; rm -Rf react_data; rm -f mdl_files/data_model.mdl; ls -lR");
     $output = "\n";
   } elseif (strcmp($what,"load") == 0) {
-    shell_exec ("rm -Rf viz_data; rm -Rf react_data; rm -f mdl_files/data_model.mdl; ls -lR");
+    if (strlen($model_file_name)>0) {
+      // echo "Loading from \"".$model_file_name."\"<br/>\n";
+      $json_string = file_get_contents ( $model_file_name );
+      $data_model = json_decode ( $json_string, true );
+      // echo "\nJSON File: ".$json_file."<br/>";
+      $pars = $data_model["mcell"]["parameter_system"]["model_parameters"];
+      // var_dump ( $pars );
+      foreach ($pars as &$par) {
+        print ( "<p><b>".$par["par_name"]."</b> = " ); // .$par["par_expression"] );
+        print ( "<input type=\"text\" size=\"8\" min=\"1\" max=\"2000\" name=\"".$par["par_name"]."\" value=".$par["par_expression"].">\n" );
+        if (strlen($par["par_units"]) > 0) { print ( " (".$par["par_units"].")" ); }
+        if (strlen($par["par_description"]) > 0) { print ( ",  ".$par["par_description"] ); }
+        print ( "</p>" );
+        // var_dump ( $par );
+      }
+      unset($par);
+    }
     $output = "\n";
   } elseif (strcmp($what,"run") == 0) {
     if (strlen($model_file_name) > 0) {
@@ -157,6 +170,12 @@ if (strlen($what) > 0) {
     }
   }
 }
+
+echo "<p>";
+echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"run\">Run MCell</button>\n";
+echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"clear\">Clear</button>\n";
+echo "</p>";
+
 echo "</center>";
 
 

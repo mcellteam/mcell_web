@@ -27,8 +27,9 @@ data model and provide the most current to this function.
 """
 
 
-import pickle
 import sys
+import pickle
+import json
 
 #### Helper Functions ####
 
@@ -42,10 +43,46 @@ def unpickle_data_model ( dmp ):
 
 def read_data_model ( file_name ):
     """ Return a data model read from a named file """
-    f = open ( file_name, 'r' )
-    pickled_model = f.read()
-    data_model = unpickle_data_model ( pickled_model )
+    if (file_name[-5:].lower() == '.json'):
+        # Assume this is a JSON format file
+        print ( "Opening a JSON file" )
+        f = open ( file_name, 'r' )
+        print ( "Reading a JSON file" )
+        json_model = f.read()
+        print ( "Loading a JSON file" )
+        data_model = json.loads ( json_model )
+        print ( "Done loading a JSON file" )
+    else:
+        # Assume this is a pickled format file
+        print ( "Opening a Pickle file" )
+        f = open ( file_name, 'r' )
+        pickled_model = f.read()
+        data_model = unpickle_data_model ( pickled_model )
+    print ( "Returning a data model" )
     return data_model
+
+dump_depth = 0;
+def dump_data_model ( name, dm ):
+    if type(dm) == type({'a':1}):  #dm is a dictionary
+        print ( str(dump_depth*"  ") + name + " {}" )
+        dump_depth += 1
+        for k,v in sorted(dm.items()):
+            dump_data_model ( k, v )
+        dump_depth += -1
+    elif type(dm) == type(['a',1]):  #dm is a list
+        print ( str(dump_depth*"  ") + name + " []" )
+        dump_depth += 1
+        i = 0
+        for v in dm:
+            k = name + "["+str(i)+"]"
+            dump_data_model ( k, v )
+            i += 1
+        dump_depth += -1
+    elif (type(dm) == type('a1')) or (type(dm) == type(u'a1')):  #dm is a string
+        print ( str(dump_depth*"  ") + name + " = " + "\"" + str(dm) + "\"" )
+    else:
+        print ( str(dump_depth*"  ") + name + " = " + str(dm) )
+
 
 def write_dm_str_val ( dm, f, dm_name, mdl_name, blank_default="", indent="" ):
     if dm_name in dm:
@@ -641,7 +678,8 @@ if len(sys.argv) > 2:
     print ( "Got parameters: " + sys.argv[1] + " " + sys.argv[2] )
     print ( "Reading Data Model: " + sys.argv[1] )
     dm = read_data_model ( sys.argv[1] )
-    # dump_data_model ( dm )
+    #print ( "Dumping Data Model: " + sys.argv[1] )
+    #dump_data_model ( dm )
     print ( "Writing MDL: " + sys.argv[2] )
     write_mdl ( dm, sys.argv[2] )
     print ( "Wrote Data Model found in \"" + sys.argv[1] + "\" to MDL file \"" + sys.argv[2] + "\"" )
