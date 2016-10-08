@@ -369,7 +369,7 @@ echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"load\">Load</
 
 <hr/>
 
-<h1>CellBlender Data Model Tree</h1>
+<h1>CellBlender Data Model Tree <?php if (strlen($model_file_name)>0) { echo " for ".$model_file_name; } ?> </h1>
  &nbsp; &nbsp; &nbsp; &nbsp; <a href="javascript:ddtreemenu.flatten('datamodel', 'expand')">Expand All</a>
  &nbsp; <a href="javascript:ddtreemenu.flatten('datamodel', 'contract')">Collapse All</a>
 
@@ -383,113 +383,7 @@ echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"load\">Load</
 
 console.log ( "\n\nTop of script in body section\n" );
 
-
-// Uncomment this to use an internal data model
-/*
-var data_model = { "mcell": {
-
-                 "TEST_LIST":[11,22,33,44, {"a":111, "b":222}],
-                 "TEST_DICT": {
-                   "name": "Test Dictionary",
-                   "sub_dict": {
-                     "k1":{"k1v1":"v11","k1v2":12},
-                     "k2":{"k2v1":21, "k2v2":"v22"},
-                     "k3":[44, 33, 22, 11]
-                   },
-                 },
-
-                 "cellblender_version": "0.1.54",
-                 "simulation_control": {
-                   "name": "",
-                   "processes_list": [
-                     {
-                       "name": "PID: 32375, MDL: Scene.main.mdl, Seed: 1",
-                       "data_model_version": "DM_2015_04_23_1753"
-                     },
-                     {
-                       "name": "PID: 32699, MDL: Scene.main.mdl, Seed: 1",
-                       "data_model_version": "DM_2015_04_23_1753"
-                     }
-                   ],
-                   "end_seed": "1",
-                   "start_seed": "1",
-                   "data_model_version": "DM_2016_04_15_1430"
-                 },
-                 "mol_viz": {
-                   "file_start_index": 0,
-                   "file_dir": "../../../../../../../home/bobkuczewski/proj/MCell/tutorials/intro/2016_09_21/libMCellPP_Test_files/mcell/viz_data/seed_00001",
-                   "file_stop_index": 9,
-                   "manual_select_viz_dir": false,
-                   "file_num": 10,
-                   "file_step_index": 1,
-                   "viz_list": [
-                     "mol_a",
-                     "mol_b"
-                   ],
-                   "file_index": 0,
-                   "color_index": 0,
-                   "color_list": [
-                     [0.8, 0.0, 0.0],
-                     [0.0, 0.8, 0.0],
-                     [0.0, 0.0, 0.8],
-                     [0.0, 0.8, 0.8],
-                     [0.8, 0.0, 0.8],
-                     [0.8, 0.8, 0.0],
-                     [1.0, 1.0, 1.0],
-                     [0.0, 0.0, 0.0]
-                   ],
-                   "render_and_save": false,
-                   "viz_enable": true,
-                   "file_name": "Scene.cellbin.00.dat",
-                   "data_model_version": "DM_2015_04_13_1700",
-                   "active_seed_index": 0,
-                   "seed_list": ["seed_00001"]
-                 },
-                 "model_objects": {
-                   "model_object_list": [
-                     {"name": "Cube"}
-                   ],
-                   "data_model_version": "DM_2014_10_24_1638"
-                 },
-                 "define_surface_classes": {"surface_class_list": [], "data_model_version": "DM_2014_10_24_1638"},
-                 "viz_output": {"all_iterations": true, "end": "1", "export_all": true, "start": "0", "step": "1", "data_model_version": "DM_2014_10_24_1638"},
-                 "define_release_patterns": {"release_pattern_list": [], "data_model_version": "DM_2014_10_24_1638"},
-                 "define_reactions": {"reaction_list": [{"reactants": "b", "name": "b -> NULL", "variable_rate": "", "bkwd_rate": "", "rxn_name": "", "variable_rate_text": "", "rxn_type": "irreversible", "products": "NULL", "variable_rate_valid": false, "fwd_rate": "3e5", "variable_rate_switch": false, "data_model_version": "DM_2014_10_24_1638"}], "data_model_version": "DM_2014_10_24_1638"},
-                 "release_sites": {"release_site_list": [{"location_x": ".1", "name": "Release_Site_1", "release_probability": "1", "points_list": [], "object_expr": "Cube", "quantity_type": "NUMBER_TO_RELEASE", "pattern": "", "stddev": "0", "location_z": "0", "location_y": "0", "molecule": "a", "site_diameter": ".01", "orient": "'", "shape": "OBJECT", "quantity": "10", "data_model_version": "DM_2015_11_11_1717"}, {"location_x": "0", "name": "Release_Site_2", "release_probability": "1", "points_list": [], "object_expr": "", "quantity_type": "GAUSSIAN_RELEASE_NUMBER", "pattern": "", "stddev": "0", "location_z": "0.1", "location_y": "0", "molecule": "b", "site_diameter": ".1", "orient": "'", "shape": "SPHERICAL", "quantity": "2", "data_model_version": "DM_2015_11_11_1717"}], "data_model_version": "DM_2014_10_24_1638"},
-                 "blender_version": [2, 77, 0],
-                 "cellblender_source_sha1": "d868a471cf8a3329dffa38bf7391c52d05fd82f9",
-                 "api_version": 0,
-                 "geometrical_objects": {
-                   "object_list": [
-                     {
-                       "name": "Cube",
-                       "location": [0.09687475115060806, 0.0, 0.0],
-                       "element_connections": [[3, 0, 1], [7, 2, 3], [5, 6, 7], [1, 4, 5], [2, 4, 0], [7, 1, 5], [3, 2, 0], [7, 6, 2], [5, 4, 6], [1, 0, 4], [2, 6, 4], [7, 3, 1]],
-                       "vertex_list": [[-0.025, -0.025, -0.025], [-0.025, -0.025, 0.025], [-0.025, 0.025, -0.025], [-0.025, 0.025, 0.025], [0.025, -0.025, -0.025], [0.025, -0.025, 0.025], [0.025, 0.025, -0.025], [0.025, 0.025, 0.025]]
-                     }
-                   ]
-                 },
-                 "modify_surface_regions": {"modify_surface_regions_list": [], "data_model_version": "DM_2014_10_24_1638"},
-                 "initialization": {"space_step": "", "radial_subdivisions": "", "center_molecules_on_grid": false, "iterations": "9", "surface_grid_density": "10000",
-                                    "notifications": {"molecule_collision_report": false, "partition_location_report": false, "box_triangulation_report": false, "final_summary": true, "file_output_report": false, "all_notifications": "INDIVIDUAL", "progress_report": true, "probability_report": "ON", "release_event_report": true, "diffusion_constant_report": "BRIEF", "iteration_report": true, "varying_probability_report": true, "probability_report_threshold": "0"},
-                                    "time_step_max": "", "microscopic_reversibility": "OFF",
-                                    "warnings": {"useless_volume_orientation": "WARNING", "high_probability_threshold": "1", "lifetime_threshold": "50", "degenerate_polygons": "WARNING", "missed_reactions": "WARNING", "negative_diffusion_constant": "WARNING", "negative_reaction_rate": "WARNING", "missing_surface_orientation": "ERROR", "high_reaction_probability": "IGNORED", "all_warnings": "INDIVIDUAL", "lifetime_too_short": "WARNING", "missed_reaction_threshold": "0.001"},
-                                    "time_step": "1e-6", "radial_directions": "", "interaction_radius": "", "accurate_3d_reactions": true,
-                                    "partitions": {"x_end": "1", "z_end": "1", "z_start": "-1", "y_end": "1", "recursion_flag": false, "y_step": "0.02", "include": false, "x_start": "-1", "z_step": "0.02", "x_step": "0.02", "y_start": "-1", "data_model_version": "DM_2016_04_15_1600"},
-                                    "vacancy_search_distance": "", "data_model_version": "DM_2014_10_24_1638"
-                 },
-                 "parameter_system": {"model_parameters": [], "_extras": {"ordered_id_names": []}},
-                 "scripting": {"force_property_update": true, "scripting_list": [], "show_simulation_scripting": false, "script_texts": {}, "dm_external_file_name": "", "show_data_model_scripting": false, "dm_internal_file_name": "", "data_model_version": "DM_2016_03_15_1900"},
-                 "define_molecules": {"molecule_list": [{"display": {"glyph": "Sphere_1", "color": [1.0, 0.0, 0.0], "scale": 1.0, "emit": 0.0}, "mol_type": "3D", "mol_name": "a", "export_viz": false, "maximum_step_length": "", "custom_time_step": "", "custom_space_step": "", "target_only": false, "mol_bngl_label": "", "diffusion_constant": "1e-6", "data_model_version": "DM_2016_01_13_1930"}, {"display": {"glyph": "Sphere_1", "color": [0.0, 1.0, 0.0], "scale": 1.0, "emit": 0.0}, "mol_type": "3D", "mol_name": "b", "export_viz": false, "maximum_step_length": "", "custom_time_step": "", "custom_space_step": "", "target_only": false, "mol_bngl_label": "", "diffusion_constant": "1e-7", "data_model_version": "DM_2016_01_13_1930"}], "data_model_version": "DM_2014_10_24_1638"},
-                 "materials": {"material_dict": {}},
-                 "reaction_data_output": {"combine_seeds": true, "rxn_step": "", "plot_layout": " plot ", "output_buf_size": "", "plot_legend": "0", "mol_colors": false, "always_generate": true, "reaction_output_list": [], "data_model_version": "DM_2016_03_15_1800"},
-                 "data_model_version": "DM_2014_10_24_1638"}
-             }
-
-console.log ( "\n\nData Model version is " + data_model["mcell"]["cellblender_version"] + "\n\n" );
-*/
-
-// Comment this when using the internal data model
+// Read the data model
 
 var source_filename = window.location.href;
 var source_path = source_filename.substring(0,source_filename.lastIndexOf("/"));
@@ -504,7 +398,7 @@ xmlhttp.onreadystatechange=function() {
     console.log ( "state changed to " + this.readyState );
     if (this.readyState == 4 && this.status == 200) {
         // readyState 4 is complete
-        myFunction(this.responseText);
+        parse_data_model(this.responseText);
 
         doc_dm = document.getElementById("datamodel");
 
@@ -532,7 +426,8 @@ xmlhttp.open("GET", url, true);
 xmlhttp.send();
 
 
-function myFunction(response) {
+function parse_data_model(response) {
+    // response should be the entire data model
     data_model = JSON.parse(response);
 }
 

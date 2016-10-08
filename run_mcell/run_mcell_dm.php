@@ -107,6 +107,7 @@ if ($end_seed < $start_seed) {
 
 $model_files = glob("data_model_files/*.txt");
 
+echo "<p>";
 echo "<b>Data Model Name:</b> &nbsp; <select name=\"model_file_name\">\n";
 echo "  <option value=\"\"></option>>";
 for ($model_file_index=0; $model_file_index<count($model_files); $model_file_index++) {
@@ -117,17 +118,25 @@ for ($model_file_index=0; $model_file_index<count($model_files); $model_file_ind
   echo "  <option ".$sel."value=".$model_files[$model_file_index].">".$model_files[$model_file_index]."</option>\n";
 }
 echo "</select>\n";
-
-echo " &nbsp; &nbsp; <b>Seeds:</b> &nbsp; <input type=\"text\" size=\"4\" min=\"1\" max=\"2000\" name=\"start_seed\" value=".$start_seed.">\n";
-echo " &nbsp; to &nbsp;                   <input type=\"text\" size=\"4\" min=\"1\" max=\"2000\" name=\"end_seed\" value=".$end_seed.">\n";
+echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"load\">Load Model</button>\n";
+echo "</p>";
+echo "<p>";
+echo " &nbsp; &nbsp; <b>Seed Range:</b> &nbsp; <input type=\"text\" size=\"4\" min=\"1\" max=\"2000\" name=\"start_seed\" value=".$start_seed.">\n";
+echo " &nbsp; to &nbsp;                        <input type=\"text\" size=\"4\" min=\"1\" max=\"2000\" name=\"end_seed\" value=".$end_seed.">\n";
+echo "</p>";
+echo "<p>";
 echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"run\">Run MCell</button>\n";
 echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"clear\">Clear</button>\n";
+echo "</p>";
 
 $output = "";
 if (strlen($what) > 0) {
   $sep = "=======================================================================================";
   if (strcmp($what,"clear") == 0) {
     // $output = "\n\n".$sep."\n  Directory Listing After Clear \n".$sep."\n\n".shell_exec ("rm -Rf viz_data; rm -Rf react_data; ls -lR");
+    shell_exec ("rm -Rf viz_data; rm -Rf react_data; rm -f mdl_files/data_model.mdl; ls -lR");
+    $output = "\n";
+  } elseif (strcmp($what,"load") == 0) {
     shell_exec ("rm -Rf viz_data; rm -Rf react_data; rm -f mdl_files/data_model.mdl; ls -lR");
     $output = "\n";
   } elseif (strcmp($what,"run") == 0) {
