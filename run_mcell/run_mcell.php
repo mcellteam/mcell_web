@@ -106,7 +106,7 @@ if ($end_seed < $start_seed) {
   $end_seed = $start_seed;
 }
 
-$model_files = glob("*.mdl");
+$model_files = glob("mdl_files/*.mdl");
 
 echo "<b>Model Name:</b> &nbsp; <select name=\"model_file_name\">\n";
 echo "  <option value=\"\"></option>>";
@@ -137,12 +137,10 @@ if (strlen($what) > 0) {
       $output = "";
       $result = "";
       for ($seed = $start_seed; $seed <= $end_seed; $seed++) {
-        $result = shell_exec ("./mcell -seed ".$seed." ".$model_file_name."; echo \" \"; echo ".$sep."; echo \" \";");
-        if ($seed == $start_seed) {
-          $output = $result;
-        } else {
-          $output = $output."\n\n".$sep."\n\n".$result;
-        }
+        $mcell_command = "./mcell -seed ".$seed." ".$model_file_name;
+        $output = $output."\n\n".$sep."\n    ".$mcell_command."\n".$sep."\n";
+        $result = shell_exec ($mcell_command);
+        $output = $output.$result."\n\n";
       }
       // $result = shell_exec ("ls -lR;");
       // $output = $output."\n\n".$sep."\n  Directory Listing After All Runs \n".$sep."\n\n".$result;
