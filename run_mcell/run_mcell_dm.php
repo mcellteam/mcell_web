@@ -184,8 +184,8 @@ if (strlen($what) > 0) {
       // Change the parameters
       $npars = count($pars);
       for ($i=0; $i<$npars; $i++) {
-        if (strcmp($pars[$i]["par_name"],"dr") == 0) {
-          $data_model["mcell"]["parameter_system"]["model_parameters"][$i]["par_expression"] = "1e3";
+        if (in_array($pars[$i]["par_name"],array_keys($_POST))) {
+          $data_model["mcell"]["parameter_system"]["model_parameters"][$i]["par_expression"] = $_POST[$pars[$i]["par_name"]];
         }
       }
       /* This didn't work
