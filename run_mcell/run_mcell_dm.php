@@ -10,16 +10,19 @@
 <hr/>
 
 <style type="text/css">
+
 /* From phpinfo style */
+
 body {background-color: #fff; color: #222; font-family: sans-serif;}
 pre {margin: 0; font-family: monospace;}
-a:link {color: #009; text-decoration: none; background-color: #fff;}
+a:link {color: #009; text-decoration: none;}
 a:hover {text-decoration: underline;}
-table {border-collapse: collapse; border: 0; width: 934px; box-shadow: 1px 2px 3px #ccc;}
+table {border-collapse: collapse; border: 0; width: 934px; box-shadow: 2px 4px 6px #008;}
 .center {text-align: center;}
 .center table {margin: 1em auto; text-align: left;}
 .center th {text-align: center !important;}
-td, th {border: 1px solid #666; font-size: 75%; vertical-align: baseline; padding: 4px 5px;}
+th {border: 1px solid #666; font-size: 90%; vertical-align: baseline; padding: 4px 5px; background-color: #ccc;}
+td {border: 1px solid #666; font-size: 75%; vertical-align: baseline; padding: 4px 5px; background-color: #eee;}
 h1 {font-size: 150%;}
 h2 {font-size: 125%;}
 .p {text-align: left;}
@@ -29,11 +32,14 @@ h2 {font-size: 125%;}
 .v i {color: #999;}
 img {float: right; border: 0;}
 hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
+input[type=text] { font-weight: bold; padding: 4px 8px 2px 4px; } /* padding is top, right, bottom, left */
+button[type=submit], input[type=button], input[type=submit], input[type=reset] { font-weight: bold; font-size: 110%; padding: 4px 8px 2px 6px; box-shadow: 1px 2px 3px #008; }
+select { font-weight: bold; font-size: 110%; padding: 4px 8px 2px 6px; box-shadow: 1px 2px 3px #008; }
 
 /* Additional styles */
 /* Body for the entire document */
 body {
-  background-color: #ffffff;
+  background-color: #def;
   color: #000033;
   margin-left: 10px;
   margin-right: 10px;
@@ -60,9 +66,11 @@ table, th, td {
 </style>
 
 
-<?php echo '<center><h1><a href="../..">MCell Web Development at mcell.snl.salk.edu</a></h1></center>'; ?>
+<center><h1 style="font-size:200%"><a href="../..">MCell Web Development at mcell.snl.salk.edu</a></h1></center>
 
 <hr/>
+
+
 
 <form action="run_mcell_dm.php" method="post">
 
@@ -109,7 +117,7 @@ $json_string = "";
 $model_files = glob("data_model_files/*.json");
 
 echo "<p>";
-echo "<b>Data Model Name:</b> &nbsp; <select name=\"model_file_name\">\n";
+echo "<b><span style=\"font-size:130%\">Data Model Name:</span></b> &nbsp; <select name=\"model_file_name\">\n";
 echo "  <option value=\"\"></option>>";
 for ($model_file_index=0; $model_file_index<count($model_files); $model_file_index++) {
   $sel = "";
@@ -126,6 +134,34 @@ echo " &nbsp; &nbsp; <b>Seed Range:</b> &nbsp; <input type=\"text\" size=\"4\" m
 echo " &nbsp; to &nbsp;                        <input type=\"text\" size=\"4\" min=\"1\" max=\"2000\" name=\"end_seed\" value=".$end_seed.">\n";
 echo "</p>";
 
+if (strlen($model_file_name)>0) {
+  // echo "Loading from \"".$model_file_name."\"<br/>\n";
+  $json_string = file_get_contents ( $model_file_name );
+  $data_model = json_decode ( $json_string, true );
+  // echo "\nJSON File: ".$json_file."<br/>";
+  $pars = $data_model["mcell"]["parameter_system"]["model_parameters"];
+  if (count($pars) > 0) {
+    // var_dump ( $pars );
+    print ( "<table>\n" );
+    print ( "<tr><th>Name &nbsp; = &nbsp; Value &nbsp; (units)</th><th>Description</th></tr>" );
+    foreach ($pars as &$par) {
+      print ( "<tr>" );
+      print ( "<td>" );
+      print ( "<b>".$par["par_name"]."</b> = " ); // .$par["par_expression"] );
+      print ( "<input type=\"text\" size=\"20\" name=\"".$par["par_name"]."\" value=".$par["par_expression"].">\n" );
+      if (strlen($par["par_units"]) > 0) { print ( " (".$par["par_units"].")" ); }
+      print ( "</td>" );
+      print ( "<td>" );
+      if (strlen($par["par_description"]) > 0) { print ( $par["par_description"] ); }
+      print ( "</td>" );
+      print ( "</tr>\n" );
+      // var_dump ( $par );
+    }
+    unset($par);
+    print ( "</table>\n" );
+  }
+}
+
 $output = "";
 if (strlen($what) > 0) {
   $sep = "=======================================================================================";
@@ -134,23 +170,6 @@ if (strlen($what) > 0) {
     shell_exec ("rm -Rf viz_data; rm -Rf react_data; rm -f mdl_files/data_model.mdl; ls -lR");
     $output = "\n";
   } elseif (strcmp($what,"load") == 0) {
-    if (strlen($model_file_name)>0) {
-      // echo "Loading from \"".$model_file_name."\"<br/>\n";
-      $json_string = file_get_contents ( $model_file_name );
-      $data_model = json_decode ( $json_string, true );
-      // echo "\nJSON File: ".$json_file."<br/>";
-      $pars = $data_model["mcell"]["parameter_system"]["model_parameters"];
-      // var_dump ( $pars );
-      foreach ($pars as &$par) {
-        print ( "<p><b>".$par["par_name"]."</b> = " ); // .$par["par_expression"] );
-        print ( "<input type=\"text\" size=\"8\" min=\"1\" max=\"2000\" name=\"".$par["par_name"]."\" value=".$par["par_expression"].">\n" );
-        if (strlen($par["par_units"]) > 0) { print ( " (".$par["par_units"].")" ); }
-        if (strlen($par["par_description"]) > 0) { print ( ",  ".$par["par_description"] ); }
-        print ( "</p>" );
-        // var_dump ( $par );
-      }
-      unset($par);
-    }
     $output = "\n";
   } elseif (strcmp($what,"run") == 0) {
     if (strlen($model_file_name) > 0) {
@@ -171,7 +190,7 @@ if (strlen($what) > 0) {
   }
 }
 
-echo "<p>";
+echo "<p style=\"padding-top:20\">";
 echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"run\">Run MCell</button>\n";
 echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"clear\">Clear</button>\n";
 echo "</p>";
