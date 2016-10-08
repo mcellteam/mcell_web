@@ -129,17 +129,29 @@ for ($model_file_index=0; $model_file_index<count($model_files); $model_file_ind
 echo "</select>\n";
 echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"load\">Load Model</button>\n";
 echo "</p>";
-echo "<p>";
-echo " &nbsp; &nbsp; <b>Seed Range:</b> &nbsp; <input type=\"text\" size=\"4\" min=\"1\" max=\"2000\" name=\"start_seed\" value=".$start_seed.">\n";
-echo " &nbsp; to &nbsp;                        <input type=\"text\" size=\"4\" min=\"1\" max=\"2000\" name=\"end_seed\" value=".$end_seed.">\n";
-echo "</p>";
 
 if (strlen($model_file_name)>0) {
-  // echo "Loading from \"".$model_file_name."\"<br/>\n";
   $json_string = file_get_contents ( $model_file_name );
   $data_model = json_decode ( $json_string, true );
   // echo "\nJSON File: ".$json_file."<br/>";
+
   $pars = $data_model["mcell"]["parameter_system"]["model_parameters"];
+
+  if (strcmp($what,"load") != 0) {
+
+    // Change the parameters to match any already in the form
+    $npars = count($pars);
+    for ($i=0; $i<$npars; $i++) {
+      if (in_array($pars[$i]["par_name"],array_keys($_POST))) {
+        $data_model["mcell"]["parameter_system"]["model_parameters"][$i]["par_expression"] = $_POST[$pars[$i]["par_name"]];
+      }
+    }
+
+    // This reassignment appears to be needed!!
+    $pars = $data_model["mcell"]["parameter_system"]["model_parameters"];
+
+  }
+
   if (count($pars) > 0) {
     // var_dump ( $pars );
     print ( "<table>\n" );
@@ -214,7 +226,9 @@ if (strlen($what) > 0) {
 }
 
 echo "<p style=\"padding-top:20\">";
-echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"run\">Run MCell</button>\n";
+echo " &nbsp; &nbsp; <b>Seed Range:</b> &nbsp; <input type=\"text\" size=\"4\" min=\"1\" max=\"2000\" name=\"start_seed\" value=".$start_seed.">\n";
+echo " &nbsp; to &nbsp;                        <input type=\"text\" size=\"4\" min=\"1\" max=\"2000\" name=\"end_seed\" value=".$end_seed.">\n";
+echo " &nbsp; &nbsp;  &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"run\">Run MCell</button>\n";
 echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"clear\">Clear</button>\n";
 echo "</p>";
 
