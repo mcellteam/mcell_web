@@ -2,5 +2,6 @@ __pycache__
 run_mcell/react_data
 run_mcell/viz_data
 run_mcell/mdl_files/data_model.mdl
+run_mcell/mdl_files/data_model.json
 
 
