@@ -66,7 +66,7 @@ table, th, td {
 </style>
 
 
-<center><h1 style="font-size:200%"><a href="../..">MCell Web Development at mcell.snl.salk.edu</a></h1></center>
+<center><h1 style="font-size:200%">MCell Web Development at <a href="../..">mcell.snl.salk.edu</a></h1></center>
 
 <hr/>
 
@@ -286,7 +286,7 @@ for ($seed_folder_index=0; $seed_folder_index<count($seed_folders); $seed_folder
 
 <br/>
 
-<h1>Count Output Plot</h1>
+<h1>Results Plot</h1>
 
 <canvas id="drawing_area" width="800" height="600" style="border:1px solid #d3d3d3;">
 Your browser does not support the HTML5 canvas tag.</canvas>

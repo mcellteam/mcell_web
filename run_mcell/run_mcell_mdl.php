@@ -60,7 +60,7 @@ table, th, td {
 </style>
 
 
-<?php echo '<center><h1><a href="../..">MCell Web Development at mcell.snl.salk.edu</a></h1></center>'; ?>
+<?php echo '<center><h1>MCell Web Development at <a href="../..">mcell.snl.salk.edu</a></h1></center>'; ?>
 
 <hr/>
 
