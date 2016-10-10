@@ -180,6 +180,7 @@ if (strlen($what) > 0) {
   if (strcmp($what,"clear") == 0) {
     // $output = "\n\n".$sep."\n  Directory Listing After Clear \n".$sep."\n\n".shell_exec ("rm -Rf viz_data; rm -Rf react_data; ls -lR");
     shell_exec ("rm -Rf viz_data; rm -Rf react_data; rm -f mdl_files/data_model.mdl; ls -lR");
+    // shell_exec ( "rm -f \"viz_data/seed_00001/.nfs0000000001322d0200000001\"" );
     $output = "\n";
   } elseif (strcmp($what,"load") == 0) {
     $output = "\n";

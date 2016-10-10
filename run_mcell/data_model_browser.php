@@ -172,7 +172,11 @@ img {
 
 /// Example from http://www.dynamicdrive.com/dynamicindex1/navigate1.htm
 
-console.log ( "Top of script in head section\n" );
+function log_this ( s ) {
+  // console.log ( s );
+}
+
+log_this ( "Top of script in head section\n" );
 
 var persisteduls=new Object()
 var ddtreemenu=new Object()
@@ -183,9 +187,9 @@ ddtreemenu.openfolder  = "open.gif"   //set image path to "open" folder image
 
 
 ddtreemenu.createTree = function(treeid, enablepersist, persistdays) {
-  console.log ( " Top of createTree for " + treeid + "\n" )
+  log_this ( " Top of createTree for " + treeid + "\n" )
   var ultags = document.getElementById(treeid).getElementsByTagName("ul")
-  console.log ( "   ultags = " + ultags + " has " + ultags.length + " elements\n" )
+  log_this ( "   ultags = " + ultags + " has " + ultags.length + " elements\n" )
   if (typeof persisteduls[treeid] == "undefined") {
     persisteduls[treeid] = (enablepersist==true && ddtreemenu.getCookie(treeid)!="") ? ddtreemenu.getCookie(treeid).split(",") : ""
   }
@@ -196,12 +200,12 @@ ddtreemenu.createTree = function(treeid, enablepersist, persistdays) {
     var durationdays=(typeof persistdays=="undefined")? 1 : parseInt(persistdays)
     ddtreemenu.dotask ( window, function() { ddtreemenu.rememberstate(treeid, durationdays) }, "unload" ) //save opened UL indexes on body unload
   }
-  console.log ( " Bottom of createTree for " + treeid + "\n" )
+  log_this ( " Bottom of createTree for " + treeid + "\n" )
 }
 
 
 ddtreemenu.buildSubTree = function ( treeid, ulelement, index ) {
-  console.log ( "  Top of buildSubTree for " + treeid + "\n" )
+  log_this ( "  Top of buildSubTree for " + treeid + "\n" )
   ulelement.parentNode.className="submenu"
 
   if (typeof persisteduls[treeid]=="object") {
@@ -236,7 +240,7 @@ ddtreemenu.buildSubTree = function ( treeid, ulelement, index ) {
   ulelement.onclick = function(e) {
     ddtreemenu.preventpropagate(e)
   }
-  console.log ( "  Bottom of buildSubTree for " + treeid + "\n" )
+  log_this ( "  Bottom of buildSubTree for " + treeid + "\n" )
 }
 
 
@@ -324,7 +328,7 @@ ddtreemenu.dotask=function(target, functionref, tasktype) { //assign a function 
     target.attachEvent(tasktype, functionref)
 }
 
-console.log ( "Bottom of script in head section\n" );
+log_this ( "Bottom of script in head section\n" );
 
 </script>
 
@@ -381,7 +385,7 @@ echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"load\">Load</
 
 <script type="text/javascript">
 
-console.log ( "\n\nTop of script in body section\n" );
+log_this ( "\n\nTop of script in body section\n" );
 
 // Read the data model
 
@@ -390,12 +394,12 @@ var source_path = source_filename.substring(0,source_filename.lastIndexOf("/"));
 var json_file = source_path + "/" + "data_model.json";
 
 json_file = source_path + "/" + document.getElementById("data_model_name_id").value;
-console.log ( "Opening: " + json_file );
+log_this ( "Opening: " + json_file );
 
 var xmlhttp = new XMLHttpRequest();
 var url = json_file;
 xmlhttp.onreadystatechange=function() {
-    console.log ( "state changed to " + this.readyState );
+    log_this ( "state changed to " + this.readyState );
     if (this.readyState == 4 && this.status == 200) {
         // readyState 4 is complete
         parse_data_model(this.responseText);
@@ -419,7 +423,7 @@ xmlhttp.onreadystatechange=function() {
 
         ddtreemenu.createTree("datamodel", true);
 
-        console.log ( "Done loading Data Model");
+        log_this ( "Done loading Data Model" );
     }
 }
 xmlhttp.open("GET", url, true);
@@ -429,6 +433,43 @@ xmlhttp.send();
 function parse_data_model(response) {
     // response should be the entire data model
     data_model = JSON.parse(response);
+}
+
+function find_name_in_object ( obj ) {
+  // The parameter "obj" should be an object (dictionary)
+  item_name = "";
+  log_this ( "Looking for name in an object" );
+  var object_keys = Object.keys(obj);
+  //for (k in object_keys) {
+  //  log_this ( "  Key = " + object_keys[k] );
+  //}
+
+  // First look for a key named "name"
+  for (k in object_keys) {
+    key = object_keys[k];
+    log_this ( "  Looking for name, found key = " + key );
+    // log_this ( "    Val = " + obj[key] );
+    if (key == "name") {
+      item_name = key + " = " + obj[key];
+      break;
+    }
+  }
+  log_this ( "Looking for name found " + item_name );
+
+  // If no "name" is found, then look for a key that contains "name"
+  if (item_name.length <= 0) {
+    // Look for a key containing "name"
+    for (k in object_keys) {
+      key = object_keys[k];
+      log_this ( "  Looking for containing name, found key = " + key );
+      if (key.indexOf("name") >= 0) {
+        item_name = key + " = " + obj[key];
+        break;
+      }
+    }
+  }
+  log_this ( "Returning item name \"" + item_name + "\"" );
+  return ( item_name );
 }
 
 
@@ -441,16 +482,18 @@ function build_elements_from_array ( arr, parent_ul, depth ) {
   var spaces = "                                                                         ";
   var indent = spaces.substring(0,depth);
   i = 0;
+  log_this ( "Build from Array" );
   for (x in arr) { // The "x" appears to be the index for arrays!!
-    console.log ( indent + "Array contains " + arr[x] + "\n" );
+    log_this ( indent + "Array contains " + arr[x] + "\n" );
+    log_this ( indent + "Array contains " + arr[x] + "\n" );
     item_li = document.createElement("li");
     if (typeof(arr[x]) != "object") {
-      console.log ( indent + "  Scalar at index " + x + " is " + arr[x] + "\n" );
+      log_this ( indent + "  Scalar at index " + x + " is " + arr[x] + "\n" );
       // This is not an array or dictionary (both are "objects" in JavaScript)
       item_text = document.createTextNode(" [" + x + "] = \"" + arr[x] + "\" is of type " + typeof(arr[x]) );
       item_li.appendChild(item_text);
     } else {
-      // An "object" can be an array or dictionary
+      // An "object" in JavaScript can be an array or dictionary
       if (arr[x] instanceof Array) {  // Note that instanceof may not always work ... check for problems!!
         item_text = document.createTextNode("Item at [" + x + "] is an array of length " + arr[x].length + "\n" );
         item_li.appendChild(item_text);
@@ -458,7 +501,11 @@ function build_elements_from_array ( arr, parent_ul, depth ) {
         build_elements_from_array ( arr[x], sublist_ul, depth+1 );
         item_li.appendChild(sublist_ul);
       } else {
-        item_text = document.createTextNode("[" + x + "] is an object of length " + Object.keys(arr[x]).length + "\n" );
+        item_name = find_name_in_object ( arr[x] );
+        if (item_name.length > 0) {
+          item_name = ", " + item_name;
+        }
+        item_text = document.createTextNode("[" + x + "] is an object of length " + Object.keys(arr[x]).length + item_name + "\n" );
         item_li.appendChild(item_text);
         sublist_ul = document.createElement("ul");
         build_elements_from_object ( arr[x], sublist_ul, depth+1 );
@@ -478,16 +525,18 @@ function build_elements_from_object ( obj, parent_ul, depth ) {
   var sublist_ul;
   var spaces = "                                                                         ";
   var indent = spaces.substring(0,depth);
+  log_this ( "Build from Object" );
   for (x in obj) { // The "x" appears to be the "key" for objects
-    console.log ( indent + "Object contains " + x + "\n" );
+    log_this ( indent + "Object contains " + x + "\n" );
+    log_this ( indent + "Object contains " + x + "\n" );
     item_li = document.createElement("li");
     if (typeof(obj[x]) != "object") {
-      console.log ( indent + "  Scalar " + x + " is " + obj[x] + "\n" );
+      log_this ( indent + "  Scalar " + x + " is " + obj[x] + "\n" );
       // This is not an array or dictionary (both are "objects" in JavaScript)
       item_text = document.createTextNode("[" + x + "] is \"" + obj[x] + "\" of type " + typeof(obj[x]) );
       item_li.appendChild(item_text);
     } else {
-      // An "object" can be an array or dictionary
+      // An "object" in JavaScript can be an array or dictionary
       if (obj[x] instanceof Array) {  // Note that instanceof may not always work ... check for problems!!
         item_text = document.createTextNode("[" + x + "] is an array of length " + obj[x].length + "\n" );
         item_li.appendChild(item_text);
@@ -495,7 +544,11 @@ function build_elements_from_object ( obj, parent_ul, depth ) {
         build_elements_from_array ( obj[x], sublist_ul, depth+1 );
         item_li.appendChild(sublist_ul);
       } else {
-        item_text = document.createTextNode("[" + x + "] is an object of length " + Object.keys(obj[x]).length + "\n" );
+        item_name = find_name_in_object ( obj[x] );
+        if (item_name.length > 0) {
+          item_name = ", " + item_name;
+        }
+        item_text = document.createTextNode("[" + x + "] is an object of length " + Object.keys(obj[x]).length + item_name + "\n" );
         item_li.appendChild(item_text);
         sublist_ul = document.createElement("ul");
         build_elements_from_object ( obj[x], sublist_ul, depth+1 );
@@ -517,6 +570,7 @@ doc_dm.appendChild(dyn_item_li);
 
 dyn_sublist_ul = document.createElement("ul");
 
+log_this ( "============ main ==============" );
 build_elements_from_object ( data_model["mcell"], dyn_sublist_ul, 0 );
 
 dyn_item_li.appendChild(dyn_sublist_ul);
@@ -525,7 +579,7 @@ doc_dm.appendChild(dyn_item_li);
 
 ddtreemenu.createTree("datamodel", true);
 
-console.log ( "Bottom of script in body section\n" );
+log_this ( "Bottom of script in body section\n" );
 
 </script>
 
