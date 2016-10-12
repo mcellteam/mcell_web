@@ -3,11 +3,6 @@
 <head>
 <title>MCell Web Development - Run MCell Data Model</title>
 <link rel="stylesheet" type="text/css" href="../style/def.css" />
-</head>
-
-<body>
-
-<hr/>
 
 <style type="text/css">
 
@@ -65,6 +60,45 @@ table, th, td {
 
 </style>
 
+
+<script>
+
+function sweep_checked ( s ) {
+  console.log ( s );
+  // alert( s );
+  sweep_checkboxes = document.getElementsByName(s);
+  if (sweep_checkboxes.length == 1) {
+    sweep_item_name = s.substr("sweep_".length);
+    end_id = sweep_item_name + "_end";
+    step_id = sweep_item_name + "_step";
+    end_item = document.getElementById(end_id);
+    step_item = document.getElementById(step_id);
+    if ( sweep_checkboxes[0].checked ) {
+      // Show the range fields
+      end_item.className = "visible";
+      step_item.className = "visible";
+      console.log( s + " is checked" );
+    } else {
+      // Hide the range fields
+      end_item.className = "hidden";
+      step_item.className = "hidden";
+      console.log( s + " is NOT checked" );
+    }
+  }
+}
+
+
+</script>
+
+</head>
+
+
+
+
+
+<body>
+
+<hr/>
 
 <center><h1 style="font-size:200%">MCell Web Development at <a href="../..">mcell.snl.salk.edu</a></h1></center>
 
@@ -154,18 +188,29 @@ if (strlen($model_file_name)>0) {
 
   if (count($pars) > 0) {
     // var_dump ( $pars );
-    print ( "<table>\n" );
-    print ( "<tr><th>Name &nbsp; = &nbsp; Value &nbsp; (units)</th><th>Description</th></tr>" );
+    print ( "<table style=\"width:95%\">\n" );
+    print ( "<tr><th style=\"width:5%\">Sweep</th><th>Name &nbsp; = &nbsp; Value &nbsp; (units)</th><th>Description</th></tr>\n" );
     foreach ($pars as &$par) {
-      print ( "<tr>" );
-      print ( "<td>" );
+      print ( "<tr>\n" );
+      //print ( "  <td><center><input type=\"checkbox\" name=\"sweep_".$par["par_name"]."\" value=\"1\" checked=\"1\"></center></td>" );
+      print ( "  <td><center><input type=\"checkbox\" name=\"sweep_".$par["par_name"]."\" value=\"1\" onclick=\"sweep_checked('sweep_".$par["par_name"]."')\"></center></td>" );
+      print ( "  <td>" );
       print ( "<b>".$par["par_name"]."</b> = " ); // .$par["par_expression"] );
-      print ( "<input type=\"text\" size=\"20\" name=\"".$par["par_name"]."\" value=".$par["par_expression"].">\n" );
-      if (strlen($par["par_units"]) > 0) { print ( " (".$par["par_units"].")" ); }
-      print ( "</td>" );
-      print ( "<td>" );
-      if (strlen($par["par_description"]) > 0) { print ( $par["par_description"] ); }
-      print ( "</td>" );
+
+      print ( "<input type=\"text\" size=\"12\" name=\"".$par["par_name"]."\" value=\"".$par["par_expression"]."\">" );
+
+      print ( " &nbsp; &nbsp; to <input type=\"text\" size=\"12\" id=\"".$par["par_name"]."_end\" name=\"".$par["par_name"]."_end\" value=\"".$par["par_expression"]."\" class=\"hidden\">" );
+      print ( " by               <input type=\"text\" size=\"12\" id=\"".$par["par_name"]."_step\" name=\"".$par["par_name"]."_step\" value=\"".$par["par_expression"]."\" class=\"hidden\">" );
+
+      if (strlen($par["par_units"]) > 0) {
+        print ( " (".$par["par_units"].")" );
+      }
+      print ( "</td>\n" );
+      print ( "  <td>" );
+      if (strlen($par["par_description"]) > 0) {
+        print ( $par["par_description"] );
+      }
+      print ( "</td>\n" );
       print ( "</tr>\n" );
       // var_dump ( $par );
     }
