@@ -126,6 +126,10 @@ $end_seed = 1;
 if (in_array("end_seed",array_keys($_POST))) {
   $end_seed = $_POST["end_seed"];
 }
+$run_limit = 1;
+if (in_array("run_limit",array_keys($_POST))) {
+  $run_limit = $_POST["run_limit"];
+}
 $what = "";
 if (in_array("what",array_keys($_POST))) {
   $what = $_POST["what"];
@@ -314,14 +318,16 @@ if ($total_mcell_runs > 1) {
 }
 
 echo "<p style=\"padding-top:20\">";
-echo " &nbsp; &nbsp; <b>Seed Range:</b> &nbsp; <input type=\"text\" size=\"4\" min=\"1\" max=\"2000\" name=\"start_seed\" value=".$start_seed.">\n";
-echo " &nbsp; to &nbsp;                        <input type=\"text\" size=\"4\" min=\"1\" max=\"2000\" name=\"end_seed\" value=".$end_seed.">\n";
+echo " &nbsp; &nbsp; <b>Seed Range:</b> &nbsp; <input type=\"text\" size=\"4\" min=\"1\" name=\"start_seed\" value=".$start_seed.">\n";
+echo " &nbsp; to &nbsp;                        <input type=\"text\" size=\"4\" min=\"1\" name=\"end_seed\" value=".$end_seed.">\n";
+
+echo " &nbsp; &nbsp; <b>Run Limit:</b> &nbsp; <input type=\"text\" size=\"4\" min=\"1\" name=\"run_limit\" value=".$run_limit.">\n";
 $button_style = "";
-if ($total_mcell_runs > 1) {
+if ($total_mcell_runs > 1 + (3 * $run_limit / 4) ) {
   $button_style = "style=\"background-color: #ee6;\"";
 }
-if ($total_mcell_runs > 10) {
-  $button_style = "style=\"background-color: #f88;\"";
+if ($total_mcell_runs > $run_limit) {
+  $button_style = "disabled style=\"background-color: #f88;\"";
 }
 echo " &nbsp; &nbsp;  &nbsp; &nbsp; <button ".$button_style." type=\"submit\" name=\"what\" value=\"run\">".$mcell_run_label."</button>\n";
 echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"clear\">Clear</button>\n";
