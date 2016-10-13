@@ -271,7 +271,11 @@ for ($i=0; $i<$npars; $i++) {
       $sweep_start = 0.0;        sscanf($_POST[$par_name],        "%f", $sweep_start);
       $sweep_end = $sweep_start; sscanf($_POST[$sweep_end_name],  "%f", $sweep_end  );
       $sweep_step  = 1.0;        sscanf($_POST[$sweep_step_name], "%f", $sweep_step );
-      $num_steps = 1 + floor ( ($sweep_end - $sweep_start) / $sweep_step );
+      if ($sweep_step > 0) {
+        $num_steps = 1 + floor ( ($sweep_end - $sweep_start) / $sweep_step );
+      } else {
+        $num_steps = 1;
+      }
       array_push ( $sweep_pars, array("sweep_name"=>$par_name,"sweep_start"=>$sweep_start, "sweep_step"=>$sweep_step, "num_steps"=>$num_steps, "step_num"=>0) );
       //print ( "<br/>Sweep parameter <b>".$par_name."</b> from <b>".$sweep_start."</b> to <b>".$sweep_end."</b> by <b>".$sweep_step."</b> for <b>".$num_steps." steps</b>." );
       print ( "<br/>Sweep parameter <b>".$par_name."</b> in <b>".$num_steps." steps</b> from <b>".$sweep_start."</b> to <b>".($sweep_start+(($num_steps-1)*$sweep_step))."</b> by steps of <b>".$sweep_step."</b>\n" );
