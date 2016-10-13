@@ -477,7 +477,7 @@ for ($seed_folder_index=0; $seed_folder_index<count($seed_folders); $seed_folder
 
 <h1>Results Plot</h1>
 
-<canvas id="drawing_area" width="800" height="600" style="border:1px solid #d3d3d3;">
+<canvas id="drawing_area" width=800 height="600" style="width:95%; border:1px solid #d3d3d3;">
 Your browser does not support the HTML5 canvas tag.</canvas>
 <p/>
 
