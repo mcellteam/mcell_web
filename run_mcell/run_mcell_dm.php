@@ -267,6 +267,7 @@ if (strlen($what) > 0) {
       $pars = $data_model["mcell"]["parameter_system"]["model_parameters"];
 
       // Sweep through the parameter space
+
       $sweep_pars = array();
 
       // Load parameters from the default form settings while building the $sweep_pars list
@@ -302,10 +303,16 @@ if (strlen($what) > 0) {
   }
 }
 
+$mcell_run_label = "Run MCell";
+$total_mcell_runs = 1 + $end_seed - $start_seed;
+if ($total_mcell_runs > 1) {
+  $mcell_run_label = sprintf("Run MCell x %d", $total_mcell_runs);
+}
+
 echo "<p style=\"padding-top:20\">";
 echo " &nbsp; &nbsp; <b>Seed Range:</b> &nbsp; <input type=\"text\" size=\"4\" min=\"1\" max=\"2000\" name=\"start_seed\" value=".$start_seed.">\n";
 echo " &nbsp; to &nbsp;                        <input type=\"text\" size=\"4\" min=\"1\" max=\"2000\" name=\"end_seed\" value=".$end_seed.">\n";
-echo " &nbsp; &nbsp;  &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"run\">Run MCell</button>\n";
+echo " &nbsp; &nbsp;  &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"run\">".$mcell_run_label."</button>\n";
 echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"clear\">Clear</button>\n";
 echo "</p>";
 
