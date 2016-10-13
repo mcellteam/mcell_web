@@ -55,7 +55,7 @@ table, th, td {
   display: none;
 }
 .visible {
-  display: block;
+  display: inline;
 }
 
 </style>
