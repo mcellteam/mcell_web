@@ -69,24 +69,19 @@ function sweep_checked ( s ) {
   sweep_checkboxes = document.getElementsByName(s);
   if (sweep_checkboxes.length == 1) {
     sweep_item_name = s.substr("sweep_".length);
-    end_id = sweep_item_name + "_end";
-    step_id = sweep_item_name + "_step";
-    end_item = document.getElementById(end_id);
-    step_item = document.getElementById(step_id);
+    range_id = "range_" + sweep_item_name;
+    range_span = document.getElementById(range_id);
     if ( sweep_checkboxes[0].checked ) {
       // Show the range fields
-      end_item.className = "visible";
-      step_item.className = "visible";
+      range_span.className = "visible";
       console.log( s + " is checked" );
     } else {
       // Hide the range fields
-      end_item.className = "hidden";
-      step_item.className = "hidden";
+      range_span.className = "hidden";
       console.log( s + " is NOT checked" );
     }
   }
 }
-
 
 </script>
 
@@ -189,7 +184,7 @@ if (strlen($model_file_name)>0) {
   if (count($pars) > 0) {
     // var_dump ( $pars );
     print ( "<table style=\"width:95%\">\n" );
-    print ( "<tr><th style=\"width:5%\">Sweep</th><th>Name &nbsp; = &nbsp; Value &nbsp; (units)</th><th>Description</th></tr>\n" );
+    print ( "<tr><th style=\"width:5%\">Sweep</th><th style=\"width:70%\">Name &nbsp; = &nbsp; Value &nbsp; (units)</th><th>Description</th></tr>\n" );
     foreach ($pars as &$par) {
       print ( "<tr>\n" );
       //print ( "  <td><center><input type=\"checkbox\" name=\"sweep_".$par["par_name"]."\" value=\"1\" checked=\"1\"></center></td>" );
@@ -199,8 +194,8 @@ if (strlen($model_file_name)>0) {
 
       print ( "<input type=\"text\" size=\"12\" name=\"".$par["par_name"]."\" value=\"".$par["par_expression"]."\">" );
 
-      print ( " &nbsp; &nbsp; to <input type=\"text\" size=\"12\" id=\"".$par["par_name"]."_end\" name=\"".$par["par_name"]."_end\" value=\"".$par["par_expression"]."\" class=\"hidden\">" );
-      print ( " by               <input type=\"text\" size=\"12\" id=\"".$par["par_name"]."_step\" name=\"".$par["par_name"]."_step\" value=\"".$par["par_expression"]."\" class=\"hidden\">" );
+      print ( "<span id=\"range_".$par["par_name"]."\" class=\"hidden\"> &nbsp; &nbsp; to <input type=\"text\" size=\"12\" name=\"".$par["par_name"]."_end\" value=\"\">" );
+      print ( " by  <input type=\"text\" size=\"12\" name=\"".$par["par_name"]."_step\" value=\"\"></span>" );
 
       if (strlen($par["par_units"]) > 0) {
         print ( " (".$par["par_units"].")" );
