@@ -138,6 +138,7 @@ if (in_array("show_text",array_keys($_POST))) {
 if ($start_seed < 1) {
   $start_seed = 1;
 }
+/*
 if ($start_seed > 20) {
   print ( "<br/>Warning: starting seed is limited to 20<br/>" );
   $start_seed = 20;
@@ -146,6 +147,7 @@ if ($end_seed > 20) {
   print ( "<br/>Warning: ending seed is limited to 20<br/>" );
   $end_seed = 20;
 }
+*/
 if ($end_seed < $start_seed) {
   $end_seed = $start_seed;
 }
@@ -245,6 +247,8 @@ if (strlen($model_file_name)>0) {
   }
 }
 
+$total_mcell_runs = 1;
+
 $output = "";
 if (strlen($what) > 0) {
   $sep = "=======================================================================================";
@@ -304,7 +308,7 @@ if (strlen($what) > 0) {
 }
 
 $mcell_run_label = "Run MCell";
-$total_mcell_runs = 1 + $end_seed - $start_seed;
+$total_mcell_runs = $total_mcell_runs + $end_seed - $start_seed;
 if ($total_mcell_runs > 1) {
   $mcell_run_label = sprintf("Run MCell x %d", $total_mcell_runs);
 }
@@ -312,7 +316,14 @@ if ($total_mcell_runs > 1) {
 echo "<p style=\"padding-top:20\">";
 echo " &nbsp; &nbsp; <b>Seed Range:</b> &nbsp; <input type=\"text\" size=\"4\" min=\"1\" max=\"2000\" name=\"start_seed\" value=".$start_seed.">\n";
 echo " &nbsp; to &nbsp;                        <input type=\"text\" size=\"4\" min=\"1\" max=\"2000\" name=\"end_seed\" value=".$end_seed.">\n";
-echo " &nbsp; &nbsp;  &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"run\">".$mcell_run_label."</button>\n";
+$button_style = "";
+if ($total_mcell_runs > 1) {
+  $button_style = "style=\"background-color: #ee6;\"";
+}
+if ($total_mcell_runs > 10) {
+  $button_style = "style=\"background-color: #f88;\"";
+}
+echo " &nbsp; &nbsp;  &nbsp; &nbsp; <button ".$button_style." type=\"submit\" name=\"what\" value=\"run\">".$mcell_run_label."</button>\n";
 echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"clear\">Clear</button>\n";
 echo "</p>";
 
