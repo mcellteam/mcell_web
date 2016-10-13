@@ -64,7 +64,7 @@ table, th, td {
 <script>
 
 function sweep_checked ( s ) {
-  console.log ( s );
+  // console.log ( s );
   // alert( s );
   sweep_checkboxes = document.getElementsByName(s);
   if (sweep_checkboxes.length == 1) {
@@ -74,11 +74,11 @@ function sweep_checked ( s ) {
     if ( sweep_checkboxes[0].checked ) {
       // Show the range fields
       range_span.className = "visible";
-      console.log( s + " is checked" );
+      // console.log( s + " is checked" );
     } else {
       // Hide the range fields
       range_span.className = "hidden";
-      console.log( s + " is NOT checked" );
+      // console.log( s + " is NOT checked" );
     }
   }
 }
@@ -393,7 +393,7 @@ function draw_data() {
   ctx.fillRect(0,0,w,h);
 
   for (var pd=0; pd<plot_data.length; pd++) {
-    console.log ( "New Plot" );
+    // console.log ( "New Plot" );
     var colors = [ "#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff", "#00ffff" ];
     ctx.strokeStyle = colors[pd%colors.length];
     ctx.beginPath();
