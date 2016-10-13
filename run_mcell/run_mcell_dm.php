@@ -107,6 +107,9 @@ function sweep_checked ( s ) {
 
 echo "<center>";
 
+
+// Copy the values from the previous form to use in drawing this form
+
 $model_file_name = "";
 if (in_array("model_file_name",array_keys($_POST))) {
   $model_file_name = $_POST["model_file_name"];
@@ -135,12 +138,19 @@ if (in_array("show_text",array_keys($_POST))) {
 if ($start_seed < 1) {
   $start_seed = 1;
 }
+if ($start_seed > 20) {
+  print ( "<br/>Warning: starting seed is limited to 20<br/>" );
+  $start_seed = 20;
+}
 if ($end_seed > 20) {
+  print ( "<br/>Warning: ending seed is limited to 20<br/>" );
   $end_seed = 20;
 }
 if ($end_seed < $start_seed) {
   $end_seed = $start_seed;
 }
+
+
 
 $json_string = "";
 $model_files = glob("data_model_files/*.json");
@@ -168,7 +178,7 @@ if (strlen($model_file_name)>0) {
 
   if (strcmp($what,"load") != 0) {
 
-    // Change the parameters to match any already in the form
+    // Change the data model parameters to match any already in the form
     $npars = count($pars);
     for ($i=0; $i<$npars; $i++) {
       if (in_array($pars[$i]["par_name"],array_keys($_POST))) {
@@ -187,15 +197,36 @@ if (strlen($model_file_name)>0) {
     print ( "<tr><th style=\"width:5%\">Sweep</th><th style=\"width:70%\">Name &nbsp; = &nbsp; Value &nbsp; (units)</th><th>Description</th></tr>\n" );
     foreach ($pars as &$par) {
       print ( "<tr>\n" );
-      //print ( "  <td><center><input type=\"checkbox\" name=\"sweep_".$par["par_name"]."\" value=\"1\" checked=\"1\"></center></td>" );
-      print ( "  <td><center><input type=\"checkbox\" name=\"sweep_".$par["par_name"]."\" value=\"1\" onclick=\"sweep_checked('sweep_".$par["par_name"]."')\"></center></td>" );
+      $par_name = $par["par_name"];
+      $sweep_checked = false;
+      if (in_array("sweep_".$par_name,array_keys($_POST))) {
+        // print ( "sweep_".$par_name." is ".$_POST["sweep_".$par_name]."<br/>" );
+        $sweep_checked = true;
+      }
+      $hidden_status = "hidden";
+      if ($sweep_checked) {
+        $hidden_status = "visible";
+        print ( "  <td><center><input type=\"checkbox\" name=\"sweep_".$par_name."\" value=\"1\" checked=\"1\" onclick=\"sweep_checked('sweep_".$par_name."')\"></center></td>" );
+      } else {
+        print ( "  <td><center><input type=\"checkbox\" name=\"sweep_".$par_name."\" value=\"1\" onclick=\"sweep_checked('sweep_".$par_name."')\"></center></td>" );
+      }
+      //print ( "  <td><center><input type=\"checkbox\" name=\"sweep_".$par_name."\" value=\"1\" checked=\"1\"></center></td>" );
       print ( "  <td>" );
-      print ( "<b>".$par["par_name"]."</b> = " ); // .$par["par_expression"] );
+      print ( "<b>".$par_name."</b> = " ); // .$par["par_expression"] );
 
-      print ( "<input type=\"text\" size=\"12\" name=\"".$par["par_name"]."\" value=\"".$par["par_expression"]."\">" );
+      print ( "<input type=\"text\" size=\"12\" name=\"".$par_name."\" value=\"".$par["par_expression"]."\">" );
 
-      print ( "<span id=\"range_".$par["par_name"]."\" class=\"hidden\"> &nbsp; &nbsp; to <input type=\"text\" size=\"12\" name=\"".$par["par_name"]."_end\" value=\"\">" );
-      print ( " by  <input type=\"text\" size=\"12\" name=\"".$par["par_name"]."_step\" value=\"\"></span>" );
+      $end_val = "";
+      if (in_array($par_name."_end",array_keys($_POST))) {
+        $end_val = $_POST[$par_name."_end"];
+      }
+      $step_val = "";
+      if (in_array($par_name."_step",array_keys($_POST))) {
+        $step_val = $_POST[$par_name."_step"];
+      }
+
+      print ( "<span id=\"range_".$par_name."\" class=\"".$hidden_status."\"> &nbsp; &nbsp; to <input type=\"text\" size=\"12\" name=\"".$par_name."_end\" value=\"".$end_val."\">" );
+      print ( " by  <input type=\"text\" size=\"12\" name=\"".$par_name."_step\" value=\"".$step_val."\"></span>" );
 
       if (strlen($par["par_units"]) > 0) {
         print ( " (".$par["par_units"].")" );
@@ -234,21 +265,26 @@ if (strlen($what) > 0) {
       $data_model = json_decode ( $json_string, true );
       // Get the parameters
       $pars = $data_model["mcell"]["parameter_system"]["model_parameters"];
-      // Change the parameters
+
+      // Sweep through the parameter space
+      $sweep_pars = array();
+
+      // Load parameters from the default form settings while building the $sweep_pars list
       $npars = count($pars);
       for ($i=0; $i<$npars; $i++) {
         if (in_array($pars[$i]["par_name"],array_keys($_POST))) {
-          $data_model["mcell"]["parameter_system"]["model_parameters"][$i]["par_expression"] = $_POST[$pars[$i]["par_name"]];
+          $par_name = $pars[$i]["par_name"];
+          $par_expr = $_POST[$par_name];
+          $data_model["mcell"]["parameter_system"]["model_parameters"][$i]["par_expression"] = $par_expr;
+          $sweep_flag_name = "sweep_".$par_name;
+          if (in_array($sweep_flag_name,array_keys($_POST))) {
+            print ( "<br/>Sweep parameter ".$par_name." based on ".$sweep_flag_name );
+          }
         }
       }
-      /* This didn't work
-      foreach ($pars as &$par) {
-        if (strcmp($par["par_name"],"dr") == 0) {
-          $par["par_expression"] = "0";
-        }
-      }
-      unset($par);
-      */
+
+      // Overwrite parameters in the data model that are being swept with current values for this pass
+
       // Encode the data model as JSON and write it to the file
       $json_output = json_encode ( $data_model );
       file_put_contents ( "mdl_files/data_model.json", $json_output );
