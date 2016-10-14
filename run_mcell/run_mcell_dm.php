@@ -499,7 +499,7 @@ Your browser does not support the HTML5 canvas tag.</canvas>
 
 <br/><button id="show_hide_control" onclick="toggle_mcell_output()"><b>Show MCell Text Output</b></button>
 
-<center id="mcellout" class="visible"><table><tr><td><pre><?php echo $output; ?></pre></td></tr></table></center>
+<center id="mcellout" class="hidden"><table><tr><td><pre><?php echo $output; ?></pre></td></tr></table></center>
 
 </center>
 
