@@ -216,7 +216,6 @@ if (strlen($model_file_name)>0) {
       } else {
         print ( "  <td><center><input type=\"checkbox\" name=\"sweep_".$par_name."\" value=\"1\" onclick=\"sweep_checked('sweep_".$par_name."')\"></center></td>" );
       }
-      //print ( "  <td><center><input type=\"checkbox\" name=\"sweep_".$par_name."\" value=\"1\" checked=\"1\"></center></td>" );
       print ( "  <td>" );
       print ( "<b>".$par_name."</b> = " ); // .$par["par_expression"] );
 
@@ -244,7 +243,6 @@ if (strlen($model_file_name)>0) {
       }
       print ( "</td>\n" );
       print ( "</tr>\n" );
-      // var_dump ( $par );
     }
     unset($par);
     print ( "</table>\n" );
@@ -277,20 +275,12 @@ for ($i=0; $i<$npars; $i++) {
         $num_steps = 1;
       }
       array_push ( $sweep_pars, array("sweep_name"=>$par_name,"sweep_start"=>$sweep_start, "sweep_step"=>$sweep_step, "num_steps"=>$num_steps, "step_num"=>0) );
-      //print ( "<br/>Sweep parameter <b>".$par_name."</b> from <b>".$sweep_start."</b> to <b>".$sweep_end."</b> by <b>".$sweep_step."</b> for <b>".$num_steps." steps</b>." );
-      // print ( "<br/>Sweep parameter <b>".$par_name."</b> in <b>".$num_steps." steps</b> from <b>".$sweep_start."</b> to <b>".($sweep_start+(($num_steps-1)*$sweep_step))."</b> by steps of <b>".$sweep_step."</b>\n" );
       $total_mcell_runs = $total_mcell_runs * $num_steps;
     }
   }
 }
 
-// print ( "<br/>Sweep <b>seed</b> from <b>".$start_seed."</b> in <b>".(1+$end_seed-$start_seed)." steps</b> from <b>".$start_seed."</b> to <b>".$end_seed."</b>\n" );
-
 $total_mcell_runs = $total_mcell_runs * ( 1 + $end_seed - $start_seed );
-
-// print ( "<br/>Total Runs = <b>".$total_mcell_runs."</b>\n" );
-
-// print ( "<hr />" );
 
 $output = "";
 
@@ -299,14 +289,12 @@ $run_folders = array();
 if (strlen($what) > 0) {
   $sep = "=======================================================================================";
   if (strcmp($what,"clear") == 0) {
-    // $output = "\n\n".$sep."\n  Directory Listing After Clear \n".$sep."\n\n".shell_exec ("rm -Rf viz_data; rm -Rf react_data; ls -lR");
     $output = shell_exec ("rm -Rf run_files/*; ls -lR");
     $output = "\n";
   } elseif (strcmp($what,"load") == 0) {
     $output = "\n";
   } elseif (strcmp($what,"run") == 0) {
     if (strlen($model_file_name) > 0) {
-      //$result = popen("/bin/ls", "r");
       $output = "";
       $result = "";
       // Re-read the data model
@@ -323,11 +311,7 @@ if (strlen($what) > 0) {
         $sw_start = $sweep_pars[$i]["sweep_start"];
         $sw_step = $sweep_pars[$i]["sweep_step"];
         $sw_end = $sw_start + (($sw_steps-1) * $sw_step);
-        //$output = $output."<br/>Sweeping parameter <b>".$sw_name."</b> in <b>".$sw_steps." steps</b> from <b>".$sw_start."</b> to <b>".$sw_end."</b> by steps of <b>".$sw_step."</b>\n";
       }
-
-      // print ( "<hr/>" );
-      // print ( "<hr />Output:<br/>".$output."<hr />" );
 
       $run_num = 0;
       while ($run_num < $total_mcell_runs) {
@@ -367,8 +351,6 @@ if (strlen($what) > 0) {
             }
           }
         }
-        // print ( "<br/>Reaction Data Path: <b>".$run_from_path."</b>\n" );
-        // print ( "<br/>MCell Path: <b>".$mcell_path."</b>\n" );
 
         array_push ( $run_folders, $run_from_path );
 
@@ -388,24 +370,18 @@ if (strlen($what) > 0) {
           $output = $output.$result."\n\n";
           $run_num += 1;
         }
-        // $result = shell_exec ("ls -lR;");
-        // $output = $output."\n\n".$sep."\n  Directory Listing After All Runs \n".$sep."\n\n".$result;
 
 
         // Increment the step number(s) in the sweep parameters
 
-        //print ( "<hr/>Incrementing...<br/>\n" );
         $num_sweep_pars = count($sweep_pars);
         for ($spi=0; $spi<$num_sweep_pars; $spi++) {
           $sweep_pars[$spi]["step_num"] += 1;
-          //print ( "<br/>Incremented ".$sweep_pars[$spi]["sweep_name"]." to ".$sweep_pars[$spi]["step_num"]."\n" );
           if ($sweep_pars[$spi]["step_num"] < $sweep_pars[$spi]["num_steps"]) {
             // We have not rolled over, so we're done and can exit the for loop
-            //print ( "<br/>We have not rolled over, so we're done and can exit the for loop" );
             break;
           } else {
             // We have rolled over, so reset to 0 and allow the loop to continue
-            //print ( "<br/>We have rolled over, so reset to 0 and allow the loop to continue" );
             $sweep_pars[$spi]["step_num"] = 0;
           }
         }
@@ -451,9 +427,7 @@ for ($i=0; $i<count($run_folders); $i++) {
 $plot_data = array();
 $plot_file_num = 0;
 
-// $seed_folders = glob("run_files/react_data/*");
 for ($seed_folder_index=0; $seed_folder_index<count($seed_folders); $seed_folder_index++) {
-  // echo "Folder = \"".$seed_folders[$seed_folder_index]."\"<br/>";
 
   $mol_files = glob($seed_folders[$seed_folder_index]."/*");
 
@@ -465,8 +439,6 @@ for ($seed_folder_index=0; $seed_folder_index<count($seed_folders); $seed_folder
 
     $seed_file_lines = explode ( "\n", file_get_contents ( $mol_files[$mol_file_index] ) );
     $num_lines = count($seed_file_lines);
-
-    // echo " &nbsp;  &nbsp;  &nbsp; File \"".$mol_files[$mol_file_index]."\" contains ".$num_lines." lines.<br/>";
 
     $plot_line_num = 0;
     for ($seed_line_index=0; $seed_line_index<$num_lines; $seed_line_index++) {
@@ -488,8 +460,6 @@ for ($seed_folder_index=0; $seed_folder_index<count($seed_folders); $seed_folder
   }
 }
 
-// phpinfo();
-
 ?>
 
 </form>
@@ -501,9 +471,8 @@ for ($seed_folder_index=0; $seed_folder_index<count($seed_folders); $seed_folder
 
 <h1>Results Plot</h1>
 
-<!-- <canvas id="drawing_area" class="visible" width="800" height="600" style="width:95%; border:1px solid #d3d3d3;"> -->
-
-<canvas id="drawing_area" class="visible" width="800" height="600" style="border:1px solid #d3d3d3;">
+<!-- This fills the width, but is blurry: <canvas id="drawing_area" class="visible" width="800" height="600" style="width:95%; border:1px solid #d3d3d3;"> -->
+<canvas id="drawing_area" class="visible" width="1200" height="600" style="border:1px solid #d3d3d3;">
 Your browser does not support the HTML5 canvas tag.</canvas>
 <p/>
 
