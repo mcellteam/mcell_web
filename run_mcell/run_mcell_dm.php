@@ -278,19 +278,19 @@ for ($i=0; $i<$npars; $i++) {
       }
       array_push ( $sweep_pars, array("sweep_name"=>$par_name,"sweep_start"=>$sweep_start, "sweep_step"=>$sweep_step, "num_steps"=>$num_steps, "step_num"=>0) );
       //print ( "<br/>Sweep parameter <b>".$par_name."</b> from <b>".$sweep_start."</b> to <b>".$sweep_end."</b> by <b>".$sweep_step."</b> for <b>".$num_steps." steps</b>." );
-      print ( "<br/>Sweep parameter <b>".$par_name."</b> in <b>".$num_steps." steps</b> from <b>".$sweep_start."</b> to <b>".($sweep_start+(($num_steps-1)*$sweep_step))."</b> by steps of <b>".$sweep_step."</b>\n" );
+      // print ( "<br/>Sweep parameter <b>".$par_name."</b> in <b>".$num_steps." steps</b> from <b>".$sweep_start."</b> to <b>".($sweep_start+(($num_steps-1)*$sweep_step))."</b> by steps of <b>".$sweep_step."</b>\n" );
       $total_mcell_runs = $total_mcell_runs * $num_steps;
     }
   }
 }
 
-print ( "<br/>Sweep <b>seed</b> from <b>".$start_seed."</b> in <b>".(1+$end_seed-$start_seed)." steps</b> from <b>".$start_seed."</b> to <b>".$end_seed."</b>\n" );
+// print ( "<br/>Sweep <b>seed</b> from <b>".$start_seed."</b> in <b>".(1+$end_seed-$start_seed)." steps</b> from <b>".$start_seed."</b> to <b>".$end_seed."</b>\n" );
 
 $total_mcell_runs = $total_mcell_runs * ( 1 + $end_seed - $start_seed );
 
-print ( "<br/>Total Runs = <b>".$total_mcell_runs."</b>\n" );
+// print ( "<br/>Total Runs = <b>".$total_mcell_runs."</b>\n" );
 
-print ( "<hr />" );
+// print ( "<hr />" );
 
 $output = "";
 
@@ -326,8 +326,8 @@ if (strlen($what) > 0) {
         //$output = $output."<br/>Sweeping parameter <b>".$sw_name."</b> in <b>".$sw_steps." steps</b> from <b>".$sw_start."</b> to <b>".$sw_end."</b> by steps of <b>".$sw_step."</b>\n";
       }
 
-      print ( "<hr/>" );
-      print ( "<hr />Output:<br/>".$output."<hr />" );
+      // print ( "<hr/>" );
+      // print ( "<hr />Output:<br/>".$output."<hr />" );
 
       $run_num = 0;
       while ($run_num < $total_mcell_runs) {
@@ -341,9 +341,6 @@ if (strlen($what) > 0) {
             $par_expr = $_POST[$par_name];
             $data_model["mcell"]["parameter_system"]["model_parameters"][$i]["par_expression"] = $par_expr;
             $sweep_flag_name = "sweep_".$par_name;
-            if (in_array($sweep_flag_name,array_keys($_POST))) {
-              // print ( "<br/>Sweep parameter ".$par_name." based on ".$sweep_flag_name );
-            }
           }
         }
 
@@ -361,7 +358,7 @@ if (strlen($what) > 0) {
           $str_val_now = sprintf("%g", $val_now);
           $run_from_path = $run_from_path."/".$sw_name."_index_".$step_num;
           $mcell_path = "../".$mcell_path;
-          print ( "<br/>Parameter <b>".$sw_name."</b> is <b>".$val_now." (\"".$str_val_now."\")</b> at step <b>".$step_num."</b>\n" );
+          // print ( "<br/>Parameter <b>".$sw_name."</b> is <b>".$val_now." (\"".$str_val_now."\")</b> at step <b>".$step_num."</b>\n" );
 
           for ($j=0; $j<$npars; $j++) {
             if ($pars[$j]["par_name"] == $sw_name) {
@@ -370,8 +367,8 @@ if (strlen($what) > 0) {
             }
           }
         }
-        print ( "<br/>Reaction Data Path: <b>".$run_from_path."\n" );
-        print ( "<br/>MCell Path: <b>".$mcell_path."\n" );
+        // print ( "<br/>Reaction Data Path: <b>".$run_from_path."</b>\n" );
+        // print ( "<br/>MCell Path: <b>".$mcell_path."</b>\n" );
 
         array_push ( $run_folders, $run_from_path );
 
@@ -382,7 +379,7 @@ if (strlen($what) > 0) {
         $json_output = json_encode ( $data_model );
         file_put_contents ( $run_from_path."/data_model.json", $json_output );
         for ($seed = $start_seed; $seed <= $end_seed; $seed++) {
-          print ( "<br/>Seed is <b>".$seed."</b>\n" );
+          // print ( "<br/>Seed is <b>".$seed."</b>\n" );
           $dm_out = shell_exec ("python data_model_to_mdl.py ".$run_from_path."/data_model.json ".$run_from_path."/data_model.mdl");
           $output = $output."\n\n".$sep."\n".$dm_out.$sep."\n";
           $mcell_command = "cd ".$run_from_path."; ls -l; ".$mcell_path." -seed ".$seed." data_model.mdl";
@@ -445,16 +442,10 @@ echo "</center>";
 
 // Build the plot data to put in the JavaScript when returning the page
 
-var_dump ( $sweep_pars );
-
 $seed_folders = array();
 for ($i=0; $i<count($run_folders); $i++) {
   $seed_folders = array_merge ( $seed_folders, glob($run_folders[$i]."/react_data/*") );
 }
-
-echo "<hr/> Seed Folders:";
-var_dump ( $seed_folders );
-echo "<hr/>";
 
 
 $plot_data = array();
