@@ -231,11 +231,11 @@ if (strlen($model_file_name)>0) {
         $step_val = $_POST[$par_name."_step"];
       }
 
-      print ( "<span id=\"range_".$par_name."\" class=\"".$hidden_status."\"> &nbsp; &nbsp; to <input type=\"text\" size=\"12\" name=\"".$par_name."_end\" value=\"".$end_val."\">" );
-      print ( " by  <input type=\"text\" size=\"12\" name=\"".$par_name."_step\" value=\"".$step_val."\"></span>" );
+      print ( "<span id=\"range_".$par_name."\" class=\"".$hidden_status."\"> &nbsp; to &nbsp; <input type=\"text\" size=\"12\" name=\"".$par_name."_end\" value=\"".$end_val."\">" );
+      print ( " &nbsp; by  &nbsp; <input type=\"text\" size=\"12\" name=\"".$par_name."_step\" value=\"".$step_val."\"></span>" );
 
       if (strlen($par["par_units"]) > 0) {
-        print ( " (".$par["par_units"].")" );
+        print ( " &nbsp; (".$par["par_units"].")" );
       }
       print ( "</td>\n" );
       print ( "  <td>" );
@@ -293,12 +293,12 @@ print ( "<br/>Total Runs = <b>".$total_mcell_runs."</b>\n" );
 print ( "<hr />" );
 
 $output = "";
+
 if (strlen($what) > 0) {
   $sep = "=======================================================================================";
   if (strcmp($what,"clear") == 0) {
     // $output = "\n\n".$sep."\n  Directory Listing After Clear \n".$sep."\n\n".shell_exec ("rm -Rf viz_data; rm -Rf react_data; ls -lR");
-    shell_exec ("rm -Rf viz_data; rm -Rf react_data; rm -f mdl_files/data_model.mdl; ls -lR");
-    // shell_exec ( "rm -f \"viz_data/seed_00001/.nfs0000000001322d0200000001\"" );
+    $output = shell_exec ("rm -Rf run_files/*; ls -lR");
     $output = "\n";
   } elseif (strcmp($what,"load") == 0) {
     $output = "\n";
@@ -321,15 +321,17 @@ if (strlen($what) > 0) {
         $sw_start = $sweep_pars[$i]["sweep_start"];
         $sw_step = $sweep_pars[$i]["sweep_step"];
         $sw_end = $sw_start + (($sw_steps-1) * $sw_step);
-        print ( "<br/>Sweeping parameter <b>".$sw_name."</b> in <b>".$sw_steps." steps</b> from <b>".$sw_start."</b> to <b>".$sw_end."</b> by steps of <b>".$sw_step."</b>\n" );
+        //$output = $output."<br/>Sweeping parameter <b>".$sw_name."</b> in <b>".$sw_steps." steps</b> from <b>".$sw_start."</b> to <b>".$sw_end."</b> by steps of <b>".$sw_step."</b>\n";
       }
 
       print ( "<hr/>" );
+      print ( "<hr />".$output."<hr />" );
 
       $run_num = 0;
       while ($run_num < $total_mcell_runs) {
 
         // Load parameters from the default form settings
+
         $npars = count($pars);
         for ($i=0; $i<$npars; $i++) {
           if (in_array($pars[$i]["par_name"],array_keys($_POST))) {
@@ -344,6 +346,9 @@ if (strlen($what) > 0) {
         }
 
         // Overwrite parameters in the data model for all parameters that are being swept with current values for this pass
+        
+        $run_from_path = "run_files"; 
+        $mcell_path = "../mcell"; 
 
         for ($i=0; $i<count($sweep_pars); $i++) {
           $sw_name = $sweep_pars[$i]["sweep_name"];
@@ -352,6 +357,8 @@ if (strlen($what) > 0) {
           $step_num = $sweep_pars[$i]["step_num"];
           $val_now = $sw_start + ($step_num*$sw_step);
           $str_val_now = sprintf("%g", $val_now);
+          $run_from_path = $run_from_path."/".$sw_name."_index_".$step_num;
+          $mcell_path = "../".$mcell_path;
           print ( "<br/>Parameter <b>".$sw_name."</b> is <b>".$val_now." (\"".$str_val_now."\")</b> at step <b>".$step_num."</b>\n" );
 
           for ($j=0; $j<$npars; $j++) {
@@ -361,15 +368,20 @@ if (strlen($what) > 0) {
             }
           }
         }
+        print ( "<br/>Reaction Data Path: <b>".$run_from_path."\n" );
+        print ( "<br/>MCell Path: <b>".$mcell_path."\n" );
+
+        // Create directories as needed
+        shell_exec ("mkdir -p ".$run_from_path);
 
         // Encode the data model as JSON and write it to the file
         $json_output = json_encode ( $data_model );
-        file_put_contents ( "mdl_files/data_model.json", $json_output );
+        file_put_contents ( $run_from_path."/data_model.json", $json_output );
         for ($seed = $start_seed; $seed <= $end_seed; $seed++) {
           print ( "<br/>Seed is <b>".$seed."</b>\n" );
-          $dm_out = shell_exec ("python data_model_to_mdl.py mdl_files/data_model.json mdl_files/data_model.mdl");
+          $dm_out = shell_exec ("python data_model_to_mdl.py ".$run_from_path."/data_model.json ".$run_from_path."/data_model.mdl");
           $output = $output."\n\n".$sep."\n".$dm_out.$sep."\n";
-          $mcell_command = "./mcell -seed ".$seed." mdl_files/data_model.mdl";
+          $mcell_command = "cd ".$run_from_path."; ls -l; ".$mcell_path." -seed ".$seed." data_model.mdl";
           $output = $output."\n\n".$sep."\n    ".$mcell_command."\n".$sep."\n";
           $result = shell_exec ($mcell_command);
           $output = $output.$result."\n\n";
@@ -481,13 +493,13 @@ for ($seed_folder_index=0; $seed_folder_index<count($seed_folders); $seed_folder
 
 <h1>Results Plot</h1>
 
-<canvas id="drawing_area" width=800 height="600" style="width:95%; border:1px solid #d3d3d3;">
+<canvas id="drawing_area" class="hidden" width=800 height="600" style="width:95%; border:1px solid #d3d3d3;">
 Your browser does not support the HTML5 canvas tag.</canvas>
 <p/>
 
 <br/><button id="show_hide_control" onclick="toggle_mcell_output()"><b>Show MCell Text Output</b></button>
 
-<center id="mcellout" class="hidden"><table><tr><td><pre><?php echo $output; ?></pre></td></tr></table></center>
+<center id="mcellout" class="visible"><table><tr><td><pre><?php echo $output; ?></pre></td></tr></table></center>
 
 </center>
 

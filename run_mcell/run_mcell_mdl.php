@@ -127,8 +127,7 @@ $output = "";
 if (strlen($what) > 0) {
   $sep = "=======================================================================================";
   if (strcmp($what,"clear") == 0) {
-    // $output = "\n\n".$sep."\n  Directory Listing After Clear \n".$sep."\n\n".shell_exec ("rm -Rf viz_data; rm -Rf react_data; ls -lR");
-    shell_exec ("rm -Rf viz_data; rm -Rf react_data; rm -f mdl_files/data_model.mdl; ls -lR");
+    $output = shell_exec ("rm -Rf run_files/*; ls -lR");
     $output = "\n";
   } elseif (strcmp($what,"run") == 0) {
     if (strlen($model_file_name) > 0) {
@@ -136,7 +135,7 @@ if (strlen($what) > 0) {
       $output = "";
       $result = "";
       for ($seed = $start_seed; $seed <= $end_seed; $seed++) {
-        $mcell_command = "./mcell -seed ".$seed." ".$model_file_name;
+        $mcell_command = "cd run_files; ../mcell -seed ".$seed." ../".$model_file_name;
         $output = $output."\n\n".$sep."\n    ".$mcell_command."\n".$sep."\n";
         $result = shell_exec ($mcell_command);
         $output = $output.$result."\n\n";
@@ -152,7 +151,7 @@ echo "</center>";
 $plot_data = array();
 $plot_file_num = 0;
 
-$seed_folders = glob("react_data/*");
+$seed_folders = glob("run_files/react_data/*");
 for ($seed_folder_index=0; $seed_folder_index<count($seed_folders); $seed_folder_index++) {
   // echo "Folder = \"".$seed_folders[$seed_folder_index]."\"<br/>";
 
