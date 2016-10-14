@@ -321,11 +321,11 @@ if (strlen($what) > 0) {
         $sw_start = $sweep_pars[$i]["sweep_start"];
         $sw_step = $sweep_pars[$i]["sweep_step"];
         $sw_end = $sw_start + (($sw_steps-1) * $sw_step);
-        //$output = $output."<br/>Sweeping parameter <b>".$sw_name."</b> in <b>".$sw_steps." steps</b> from <b>".$sw_start."</b> to <b>".$sw_end."</b> by steps of <b>".$sw_step."</b>\n";
+        $output = $output."<br/>Sweeping parameter <b>".$sw_name."</b> in <b>".$sw_steps." steps</b> from <b>".$sw_start."</b> to <b>".$sw_end."</b> by steps of <b>".$sw_step."</b>\n";
       }
 
       print ( "<hr/>" );
-      print ( "<hr />".$output."<hr />" );
+      print ( "<hr />Output:<br/>".$output."<hr />" );
 
       $run_num = 0;
       while ($run_num < $total_mcell_runs) {
@@ -439,11 +439,14 @@ echo "</p>";
 
 echo "</center>";
 
+// Build the plot data to put in the JavaScript when returning the page
+
+var_dump ( $sweep_pars );
 
 $plot_data = array();
 $plot_file_num = 0;
 
-$seed_folders = glob("react_data/*");
+$seed_folders = glob("run_files/react_data/*");
 for ($seed_folder_index=0; $seed_folder_index<count($seed_folders); $seed_folder_index++) {
   // echo "Folder = \"".$seed_folders[$seed_folder_index]."\"<br/>";
 
@@ -491,11 +494,15 @@ for ($seed_folder_index=0; $seed_folder_index<count($seed_folders); $seed_folder
 
 <br/>
 
+
 <h1>Results Plot</h1>
 
-<canvas id="drawing_area" class="hidden" width=800 height="600" style="width:95%; border:1px solid #d3d3d3;">
+<!-- <canvas id="drawing_area" class="visible" width="800" height="600" style="width:95%; border:1px solid #d3d3d3;"> -->
+
+<canvas id="drawing_area" class="visible" width="800" height="600" style="border:1px solid #d3d3d3;">
 Your browser does not support the HTML5 canvas tag.</canvas>
 <p/>
+
 
 <br/><button id="show_hide_control" onclick="toggle_mcell_output()"><b>Show MCell Text Output</b></button>
 
