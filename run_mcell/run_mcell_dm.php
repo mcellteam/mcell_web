@@ -294,6 +294,8 @@ print ( "<hr />" );
 
 $output = "";
 
+$run_folders = array();
+
 if (strlen($what) > 0) {
   $sep = "=======================================================================================";
   if (strcmp($what,"clear") == 0) {
@@ -321,7 +323,7 @@ if (strlen($what) > 0) {
         $sw_start = $sweep_pars[$i]["sweep_start"];
         $sw_step = $sweep_pars[$i]["sweep_step"];
         $sw_end = $sw_start + (($sw_steps-1) * $sw_step);
-        $output = $output."<br/>Sweeping parameter <b>".$sw_name."</b> in <b>".$sw_steps." steps</b> from <b>".$sw_start."</b> to <b>".$sw_end."</b> by steps of <b>".$sw_step."</b>\n";
+        //$output = $output."<br/>Sweeping parameter <b>".$sw_name."</b> in <b>".$sw_steps." steps</b> from <b>".$sw_start."</b> to <b>".$sw_end."</b> by steps of <b>".$sw_step."</b>\n";
       }
 
       print ( "<hr/>" );
@@ -370,6 +372,8 @@ if (strlen($what) > 0) {
         }
         print ( "<br/>Reaction Data Path: <b>".$run_from_path."\n" );
         print ( "<br/>MCell Path: <b>".$mcell_path."\n" );
+
+        array_push ( $run_folders, $run_from_path );
 
         // Create directories as needed
         shell_exec ("mkdir -p ".$run_from_path);
@@ -443,6 +447,10 @@ echo "</center>";
 
 var_dump ( $sweep_pars );
 
+for ($i=0; $i<count($run_folders); $i++) {
+  echo "<br/>Folder = ".$run_folders[$i];
+}
+
 $plot_data = array();
 $plot_file_num = 0;
 
@@ -494,7 +502,6 @@ for ($seed_folder_index=0; $seed_folder_index<count($seed_folders); $seed_folder
 
 <br/>
 
-
 <h1>Results Plot</h1>
 
 <!-- <canvas id="drawing_area" class="visible" width="800" height="600" style="width:95%; border:1px solid #d3d3d3;"> -->
@@ -504,11 +511,11 @@ Your browser does not support the HTML5 canvas tag.</canvas>
 <p/>
 
 
-<br/><button id="show_hide_control" onclick="toggle_mcell_output()"><b>Show MCell Text Output</b></button>
-
-<center id="mcellout" class="hidden"><table><tr><td><pre><?php echo $output; ?></pre></td></tr></table></center>
+<br/><button type="button" id="show_hide_control" onclick="toggle_mcell_output()"><b>Show MCell Text Output</b></button>
 
 </center>
+
+<center id="mcellout" class="hidden"><table><tr><td><pre><?php echo $output; ?></pre></td></tr></table></center>
 
 <script>
 
@@ -516,7 +523,7 @@ function toggle_mcell_output() {
   // console.log ( "toggle mcell output!!" );
   mco = document.getElementById("mcellout");
   sh = document.getElementById("show_hide_control")
-  if (mco.getAttribute('class') == "visible") {
+  if (mco.getAttribute('class') != "hidden") {
     mco.setAttribute('class', 'hidden');
     sh.innerHTML = "<b>Show MCell Text Output</b>";
   } else if (mco.getAttribute('class') == "hidden") {
@@ -526,7 +533,7 @@ function toggle_mcell_output() {
 }
 
 // PHP will have filled in the $plot_data variable with the plot data (above).
-// This next line generates an in-line JavaScript statement containing all of that data.
+// This next line generates an in-line JavaScript array containing all of that data.
 // The resulting 3D array will be indexed by Plot#, x/y, step
 
 var plot_data = <?php echo json_encode($plot_data); ?>;
