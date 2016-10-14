@@ -447,14 +447,20 @@ echo "</center>";
 
 var_dump ( $sweep_pars );
 
+$seed_folders = array();
 for ($i=0; $i<count($run_folders); $i++) {
-  echo "<br/>Folder = ".$run_folders[$i];
+  $seed_folders = array_merge ( $seed_folders, glob($run_folders[$i]."/react_data/*") );
 }
+
+echo "<hr/> Seed Folders:";
+var_dump ( $seed_folders );
+echo "<hr/>";
+
 
 $plot_data = array();
 $plot_file_num = 0;
 
-$seed_folders = glob("run_files/react_data/*");
+// $seed_folders = glob("run_files/react_data/*");
 for ($seed_folder_index=0; $seed_folder_index<count($seed_folders); $seed_folder_index++) {
   // echo "Folder = \"".$seed_folders[$seed_folder_index]."\"<br/>";
 
