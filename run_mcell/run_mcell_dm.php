@@ -301,6 +301,22 @@ $output = "";
 
 $run_folders = array();
 
+/*
+  Old Format (pure dictionary does not preserve order):
+    {
+      "dr" : [ 10000, 30000, 50000 ],
+      "delay" : [ 0.0001, 0.0051 ],
+      "offset" : [ 1.0e-5, 0.00081, 0.00161 ]
+    }
+
+  New Format (list preserves order):
+    [
+      { "name": "dr", "values" : [ 10000, 30000, 50000 ] },
+      { "name": "delay", "values" : [ 0.0001, 0.0051 ] },
+      { "name": "offset", "values" : [ 1.0e-5, 0.00081, 0.00161 ] }
+    ]
+*/
+
 if (strlen($what) > 0) {
   $sep = "=======================================================================================";
   if (strcmp($what,"clear") == 0) {
@@ -320,9 +336,9 @@ if (strlen($what) > 0) {
 
       // Sweep through the parameter space
       
-      // Start by writing the { "p1":[values], "p2":[values] } JSON dictionary
+      // Start by writing the [ {"name:"p1", "values":[values] }, {"name:"p1", "values":[values] } ] JSON list
       $run_pars_file = fopen ( "run_files/".$users_name."/run_parameters.json", "w" );
-      fwrite ( $run_pars_file, "{\n" );
+      fwrite ( $run_pars_file, "[\n" );
 
       $comma = ",";
       $sweep_count = count($sweep_pars);
@@ -332,7 +348,7 @@ if (strlen($what) > 0) {
         $sw_start = $sweep_pars[$i]["sweep_start"];
         $sw_step = $sweep_pars[$i]["sweep_step"];
         $sw_end = $sw_start + (($sw_steps-1) * $sw_step);
-        fwrite ( $run_pars_file, "  \"".$sw_name."\" : [" );
+        fwrite ( $run_pars_file, "  { \"name\": \"".$sw_name."\", \"values\" : [" );
         for ($index=0; $index<$sw_steps; $index++ ) {
           $comma = ",";
           if ($index == $sw_steps-1) {
@@ -344,10 +360,10 @@ if (strlen($what) > 0) {
         if ($i == $sweep_count-1) {
           $comma = "";
         }
-        fwrite ( $run_pars_file, " ]".$comma."\n" );
+        fwrite ( $run_pars_file, " ] }".$comma."\n" );
       }
 
-      fwrite ( $run_pars_file, "}\n" );
+      fwrite ( $run_pars_file, "]\n" );
       fclose ( $run_pars_file );
 
       $run_num = 0;
