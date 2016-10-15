@@ -186,6 +186,8 @@ echo "</select>\n";
 echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"load\">Load Model</button>\n";
 echo "</p>";
 
+$pars = NULL;
+
 if (strlen($model_file_name)>0) {
   $json_string = file_get_contents ( $model_file_name );
   $data_model = json_decode ( $json_string, true );
@@ -264,29 +266,31 @@ $total_mcell_runs = 1;
 
 $sweep_pars = array();
 
-// Load parameters from the default form settings while building the $sweep_pars list (start, step, count)
-$npars = count($pars);
-for ($i=0; $i<$npars; $i++) {
-  if (in_array($pars[$i]["par_name"],array_keys($_POST))) {
-    $par_name = $pars[$i]["par_name"];
-    $par_expr = $_POST[$par_name];
-    $data_model["mcell"]["parameter_system"]["model_parameters"][$i]["par_expression"] = $par_expr;
-    $sweep_flag_name = "sweep_".$par_name;
-    if (in_array($sweep_flag_name,array_keys($_POST))) {
-      // The checkbox field only appears to be in the $_POST when it is checked, otherwise there should be another value check here
-      $sweep_start_name = $par_name;
-      $sweep_end_name = $par_name."_end";
-      $sweep_step_name = $par_name."_step";
-      $sweep_start = 0.0;        sscanf($_POST[$par_name],        "%f", $sweep_start);
-      $sweep_end = $sweep_start; sscanf($_POST[$sweep_end_name],  "%f", $sweep_end  );
-      $sweep_step  = 1.0;        sscanf($_POST[$sweep_step_name], "%f", $sweep_step );
-      if ($sweep_step > 0) {
-        $num_steps = 1 + floor ( ($sweep_end - $sweep_start) / $sweep_step );
-      } else {
-        $num_steps = 1;
+if ($pars != NULL) {
+  // Load parameters from the default form settings while building the $sweep_pars list (start, step, count)
+  $npars = count($pars);
+  for ($i=0; $i<$npars; $i++) {
+    if (in_array($pars[$i]["par_name"],array_keys($_POST))) {
+      $par_name = $pars[$i]["par_name"];
+      $par_expr = $_POST[$par_name];
+      $data_model["mcell"]["parameter_system"]["model_parameters"][$i]["par_expression"] = $par_expr;
+      $sweep_flag_name = "sweep_".$par_name;
+      if (in_array($sweep_flag_name,array_keys($_POST))) {
+        // The checkbox field only appears to be in the $_POST when it is checked, otherwise there should be another value check here
+        $sweep_start_name = $par_name;
+        $sweep_end_name = $par_name."_end";
+        $sweep_step_name = $par_name."_step";
+        $sweep_start = 0.0;        sscanf($_POST[$par_name],        "%f", $sweep_start);
+        $sweep_end = $sweep_start; sscanf($_POST[$sweep_end_name],  "%f", $sweep_end  );
+        $sweep_step  = 1.0;        sscanf($_POST[$sweep_step_name], "%f", $sweep_step );
+        if ($sweep_step > 0) {
+          $num_steps = 1 + floor ( ($sweep_end - $sweep_start) / $sweep_step );
+        } else {
+          $num_steps = 1;
+        }
+        array_push ( $sweep_pars, array("sweep_name"=>$par_name,"sweep_start"=>$sweep_start, "sweep_step"=>$sweep_step, "num_steps"=>$num_steps, "step_num"=>0) );
+        $total_mcell_runs = $total_mcell_runs * $num_steps;
       }
-      array_push ( $sweep_pars, array("sweep_name"=>$par_name,"sweep_start"=>$sweep_start, "sweep_step"=>$sweep_step, "num_steps"=>$num_steps, "step_num"=>0) );
-      $total_mcell_runs = $total_mcell_runs * $num_steps;
     }
   }
 }
