@@ -319,14 +319,36 @@ if (strlen($what) > 0) {
       $pars = $data_model["mcell"]["parameter_system"]["model_parameters"];
 
       // Sweep through the parameter space
+      
+      // Start by writing the { "p1":[values], "p2":[values] } JSON dictionary
+      $run_pars_file = fopen ( "run_files/".$users_name."/run_parameters.json", "w" );
+      fwrite ( $run_pars_file, "{\n" );
 
-      for ($i=0; $i<count($sweep_pars); $i++) {
+      $comma = ",";
+      $sweep_count = count($sweep_pars);
+      for ($i=0; $i<$sweep_count; $i++) {
         $sw_name = $sweep_pars[$i]["sweep_name"];
         $sw_steps = $sweep_pars[$i]["num_steps"];
         $sw_start = $sweep_pars[$i]["sweep_start"];
         $sw_step = $sweep_pars[$i]["sweep_step"];
         $sw_end = $sw_start + (($sw_steps-1) * $sw_step);
+        fwrite ( $run_pars_file, "  \"".$sw_name."\" : [" );
+        for ($index=0; $index<$sw_steps; $index++ ) {
+          $comma = ",";
+          if ($index == $sw_steps-1) {
+            $comma = "";
+          }
+          fprintf ( $run_pars_file, " %.15g".$comma, $sw_start + ($index * $sw_step) );
+        }
+        $comma = ",";
+        if ($i == $sweep_count-1) {
+          $comma = "";
+        }
+        fwrite ( $run_pars_file, " ]".$comma."\n" );
       }
+
+      fwrite ( $run_pars_file, "}\n" );
+      fclose ( $run_pars_file );
 
       $run_num = 0;
       while ($run_num < $total_mcell_runs) {
