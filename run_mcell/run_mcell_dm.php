@@ -93,9 +93,19 @@ function sweep_checked ( s ) {
 
 <body>
 
+
+<?php
+$users_name = "";
+$users_name_shown = "";
+if (in_array("REMOTE_USER",array_keys($_SERVER))) {
+  $users_name = $_SERVER["REMOTE_USER"];
+  $users_name_shown = " &nbsp [".$users_name."]";
+}
+?>
+
 <hr/>
 
-<center><h1 style="font-size:200%">MCell Web Development at <a href="../..">mcell.snl.salk.edu</a></h1></center>
+<center><h1 style="font-size:200%">MCell Web Development at <a href="../..">mcell.snl.salk.edu</a> <?php echo $users_name_shown; ?> </h1></center>
 
 <hr/>
 
@@ -109,6 +119,7 @@ echo "<center>";
 
 
 // Copy the values from the previous form to use in drawing this form
+
 
 $model_file_name = "";
 if (in_array("model_file_name",array_keys($_POST))) {
@@ -289,7 +300,7 @@ $run_folders = array();
 if (strlen($what) > 0) {
   $sep = "=======================================================================================";
   if (strcmp($what,"clear") == 0) {
-    $output = shell_exec ("rm -Rf run_files/*; ls -lR");
+    $output = shell_exec ("rm -Rf run_files/".$users_name."/*; ls -lR");
     $output = "\n";
   } elseif (strcmp($what,"load") == 0) {
     $output = "\n";
@@ -330,8 +341,8 @@ if (strlen($what) > 0) {
 
         // Overwrite parameters in the data model for all parameters that are being swept with current values for this pass
         
-        $run_from_path = "run_files"; 
-        $mcell_path = "../mcell"; 
+        $run_from_path = "run_files/".$users_name; 
+        $mcell_path = "../../mcell"; 
 
         for ($i=0; $i<count($sweep_pars); $i++) {
           $sw_name = $sweep_pars[$i]["sweep_name"];

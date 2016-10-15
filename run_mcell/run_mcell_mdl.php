@@ -3,11 +3,6 @@
 <head>
 <title>MCell Web Development - Run MCell MDL</title>
 <link rel="stylesheet" type="text/css" href="../style/def.css" />
-</head>
-
-<body>
-
-<hr/>
 
 <style type="text/css">
 /* From phpinfo style */
@@ -59,8 +54,24 @@ table, th, td {
 
 </style>
 
+</head>
 
-<?php echo '<center><h1>MCell Web Development at <a href="../..">mcell.snl.salk.edu</a></h1></center>'; ?>
+<body>
+
+
+<?php
+$users_name = "";
+$users_name_shown = "";
+if (in_array("REMOTE_USER",array_keys($_SERVER))) {
+  $users_name = $_SERVER["REMOTE_USER"];
+  $users_name_shown = " &nbsp [".$users_name."]";
+}
+?>
+
+
+<hr/>
+
+<?php echo '<center><h1>MCell Web Development at <a href="../..">mcell.snl.salk.edu</a>'.$users_name_shown.'</h1></center>'; ?>
 
 <hr/>
 
@@ -127,7 +138,7 @@ $output = "";
 if (strlen($what) > 0) {
   $sep = "=======================================================================================";
   if (strcmp($what,"clear") == 0) {
-    $output = shell_exec ("rm -Rf run_files/*; ls -lR");
+    $output = shell_exec ("rm -Rf run_files/".$users_name."/*; ls -lR");
     $output = "\n";
   } elseif (strcmp($what,"run") == 0) {
     if (strlen($model_file_name) > 0) {
@@ -135,7 +146,7 @@ if (strlen($what) > 0) {
       $output = "";
       $result = "";
       for ($seed = $start_seed; $seed <= $end_seed; $seed++) {
-        $mcell_command = "cd run_files; ../mcell -seed ".$seed." ../".$model_file_name;
+        $mcell_command = "cd run_files/".$users_name."; ../../mcell -seed ".$seed." ../../".$model_file_name;
         $output = $output."\n\n".$sep."\n    ".$mcell_command."\n".$sep."\n";
         $result = shell_exec ($mcell_command);
         $output = $output.$result."\n\n";
@@ -151,7 +162,7 @@ echo "</center>";
 $plot_data = array();
 $plot_file_num = 0;
 
-$seed_folders = glob("run_files/react_data/*");
+$seed_folders = glob("run_files/".$users_name."/react_data/*");
 for ($seed_folder_index=0; $seed_folder_index<count($seed_folders); $seed_folder_index++) {
   // echo "Folder = \"".$seed_folders[$seed_folder_index]."\"<br/>";
 
