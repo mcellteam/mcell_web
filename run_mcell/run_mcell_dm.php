@@ -153,16 +153,6 @@ if (in_array("show_text",array_keys($_POST))) {
 if ($start_seed < 1) {
   $start_seed = 1;
 }
-/*
-if ($start_seed > 20) {
-  print ( "<br/>Warning: starting seed is limited to 20<br/>" );
-  $start_seed = 20;
-}
-if ($end_seed > 20) {
-  print ( "<br/>Warning: ending seed is limited to 20<br/>" );
-  $end_seed = 20;
-}
-*/
 if ($end_seed < $start_seed) {
   $end_seed = $start_seed;
 }
@@ -196,8 +186,8 @@ if (strlen($model_file_name)>0) {
   $pars = $data_model["mcell"]["parameter_system"]["model_parameters"];
 
   if (strcmp($what,"load") != 0) {
-
-    // Change the data model parameters to match any already in the form
+    // This is NOT a new load
+    // Change the data model parameters to match those in the form
     $npars = count($pars);
     for ($i=0; $i<$npars; $i++) {
       if (in_array($pars[$i]["par_name"],array_keys($_POST))) {
@@ -217,33 +207,70 @@ if (strlen($model_file_name)>0) {
     foreach ($pars as &$par) {
       print ( "<tr>\n" );
       $par_name = $par["par_name"];
+      $par_value = $par["par_expression"];
+
       $sweep_checked = false;
-      if (in_array("sweep_".$par_name,array_keys($_POST))) {
-        // print ( "sweep_".$par_name." is ".$_POST["sweep_".$par_name]."<br/>" );
-        $sweep_checked = true;
+      $start_val = "";
+      $end_val = "";
+      $step_val = "";
+      if (strcmp($what,"load") == 0) {
+        // Get sweep information from Data Model
+        if (array_key_exists("sweep_expression",$par)) {
+          $sweep_expr = $par["sweep_expression"];
+          $num_seps = substr_count($sweep_expr,":");
+          if ($num_seps <= 0) {
+            // This is a scalar value
+            $start_val = $sweep_expr;
+            $end_val =  $sweep_expr;
+            $step_val = "1";
+          } else {
+            $parts = preg_split("[:]", $sweep_expr);
+            if ($num_seps == 1) {
+              $start_val = $parts[0];
+              $end_val = $parts[1];
+              $step_val = "1";
+            } else { // if ($num_seps >= 2) {
+              $start_val = $parts[0];
+              $end_val = $parts[1];
+              $step_val = $parts[2];
+            }
+          }
+        }
+        if (array_key_exists("sweep_enabled",$par)) {
+          if ($par["sweep_enabled"]) {
+            $sweep_checked = true;
+            if (strlen($start_val) > 0) {
+              $par_value = $start_val;
+            }
+          }
+        }
+      } else {
+        // Get sweep information from HTML Form
+        if (in_array("sweep_".$par_name,array_keys($_POST))) {
+          // print ( "sweep_".$par_name." is ".$_POST["sweep_".$par_name]."<br/>" );
+          $sweep_checked = true;
+        }
+        if (in_array($par_name."_end",array_keys($_POST))) {
+          $end_val = $_POST[$par_name."_end"];
+        }
+        if (in_array($par_name."_step",array_keys($_POST))) {
+          $step_val = $_POST[$par_name."_step"];
+        }
       }
-      $hidden_status = "hidden";
+
+      $sweep_visibility = "hidden";
       if ($sweep_checked) {
-        $hidden_status = "visible";
+        $sweep_visibility = "visible";
         print ( "  <td><center><input type=\"checkbox\" name=\"sweep_".$par_name."\" value=\"1\" checked=\"1\" onclick=\"sweep_checked('sweep_".$par_name."')\"></center></td>" );
       } else {
-        print ( "  <td><center><input type=\"checkbox\" name=\"sweep_".$par_name."\" value=\"1\" onclick=\"sweep_checked('sweep_".$par_name."')\"></center></td>" );
+        print ( "  <td><center><input type=\"checkbox\" name=\"sweep_".$par_name."\" value=\"1\"               onclick=\"sweep_checked('sweep_".$par_name."')\"></center></td>" );
       }
       print ( "  <td>" );
-      print ( "<b>".$par_name."</b> = " ); // .$par["par_expression"] );
+      print ( "<b>".$par_name."</b> = " );
 
-      print ( "<input type=\"text\" size=\"12\" name=\"".$par_name."\" value=\"".$par["par_expression"]."\">" );
+      print ( "<input type=\"text\" size=\"12\" name=\"".$par_name."\" value=\"".$par_value."\">" );
 
-      $end_val = "";
-      if (in_array($par_name."_end",array_keys($_POST))) {
-        $end_val = $_POST[$par_name."_end"];
-      }
-      $step_val = "";
-      if (in_array($par_name."_step",array_keys($_POST))) {
-        $step_val = $_POST[$par_name."_step"];
-      }
-
-      print ( "<span id=\"range_".$par_name."\" class=\"".$hidden_status."\"> &nbsp; to &nbsp; <input type=\"text\" size=\"12\" name=\"".$par_name."_end\" value=\"".$end_val."\">" );
+      print ( "<span id=\"range_".$par_name."\" class=\"".$sweep_visibility."\"> &nbsp; to &nbsp; <input type=\"text\" size=\"12\" name=\"".$par_name."_end\" value=\"".$end_val."\">" );
       print ( " &nbsp; by  &nbsp; <input type=\"text\" size=\"12\" name=\"".$par_name."_step\" value=\"".$step_val."\"></span>" );
 
       if (strlen($par["par_units"]) > 0) {
@@ -464,7 +491,7 @@ if ($total_mcell_runs > $run_limit) {
   $button_style = "disabled style=\"background-color: #f88;\"";
 }
 echo " &nbsp; &nbsp;  &nbsp; &nbsp; <button ".$button_style." type=\"submit\" name=\"what\" value=\"run\">".$mcell_run_label."</button>\n";
-echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"clear\">Reset</button>\n";
+echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"clear\">Refresh</button>\n";
 echo "</p>";
 
 echo "</center>";
