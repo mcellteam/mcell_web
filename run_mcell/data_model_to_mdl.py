@@ -27,8 +27,8 @@ data model and provide the most current to this function.
 """
 
 
-import sys
 import pickle
+import sys
 import json
 
 #### Helper Functions ####
@@ -43,8 +43,18 @@ def unpickle_data_model ( dmp ):
 
 def read_data_model ( file_name ):
     """ Return a data model read from a named file """
-    if (file_name[-5:].lower() == '.json'):
-        # Assume this is a JSON format file
+    # Start by determining if this is a JSON file or not
+    is_json = False
+    f = open ( file_name, 'r' )
+    header = f.read(20)
+    if '"mcell":' in header:
+      is_json = True
+    elif "'mcell':" in header:
+      is_json = True
+    f.close()
+    # Open as appropriate
+    if is_json:
+        # Open as a JSON format file
         print ( "Opening a JSON file" )
         f = open ( file_name, 'r' )
         print ( "Reading a JSON file" )
@@ -53,7 +63,7 @@ def read_data_model ( file_name ):
         data_model = json.loads ( json_model )
         print ( "Done loading a JSON file" )
     else:
-        # Assume this is a pickled format file
+        # Open as a pickled format file
         print ( "Opening a Pickle file" )
         f = open ( file_name, 'r' )
         pickled_model = f.read()
@@ -140,15 +150,12 @@ def write_mdl ( dm, file_name ):
     # f.write ( "/* MDL Generated from Data Model */\n" )
     if ('mcell' in dm):
       mcell = dm['mcell']
-      dt = "1e-6"
       if 'parameter_system' in mcell:
         ps = mcell['parameter_system']
         write_parameter_system ( ps, f )
       if 'initialization' in mcell:
         init = mcell['initialization']
         write_initialization ( init, f )
-        if "time_step" in init:
-          dt = init["time_step"]
         if 'partitions' in init:
           parts = mcell['initialization']['partitions']
           write_partitions ( parts, f )
@@ -193,7 +200,12 @@ def write_mdl ( dm, file_name ):
         mols = None
         if ('define_molecules' in mcell):
           mols = mcell['define_molecules']
-        write_react_out ( reactout, dt, f )
+        time_step = ""
+        if 'initialization' in mcell:
+          init = mcell['initialization']
+          if "time_step" in init:
+            time_step = init['time_step']
+        write_react_out ( reactout, mols, time_step, f )
 
     f.close()
 
@@ -210,7 +222,7 @@ def write_parameter_system ( ps, f ):
           if True:
             f.write ( p['par_name'] + " = " +              p['par_expression'] )
           else:
-            f.write ( p['par_name'] + " = " + "%.g"%(p['extras']['par_value']) )
+            f.write ( p['par_name'] + " = " + "%.15g"%(p['extras']['par_value']) )
 
           # Write the optional description and units in a comment (if non empty)
           if (len(p['par_description']) > 0) or (len(p['par_units']) > 0):
@@ -536,11 +548,11 @@ def write_release_patterns ( pats, f ):
         for p in plist:
           f.write ( "DEFINE_RELEASE_PATTERN %s\n" % (p['name']) )
           f.write ( "{\n" )
-          if len(p['delay']) > 0:            f.write ( "  DELAY = %s\n" % (p['delay']) )
-          if len(p['release_interval']) > 0: f.write ( "  RELEASE_INTERVAL = %s\n" % (p['release_interval']) )
-          if len(p['train_duration']) > 0:   f.write ( "  TRAIN_DURATION = %s\n" % (p['train_duration']) )
-          if len(p['train_interval']) > 0:   f.write ( "  TRAIN_INTERVAL = %s\n" % (p['train_interval']) )
-          if len(p['number_of_trains']) > 0: f.write ( "  NUMBER_OF_TRAINS = %s\n" % (p['number_of_trains']) )
+          if ('delay' in p) and (len(p['delay']) > 0): f.write ( "  DELAY = %s\n" % (p['delay']) )
+          if ('release_interval' in p) and (len(p['release_interval']) > 0): f.write ( "  RELEASE_INTERVAL = %s\n" % (p['release_interval']) )
+          if ('train_duration' in p) and (len(p['train_duration']) > 0): f.write ( "  TRAIN_DURATION = %s\n" % (p['train_duration']) )
+          if ('train_interval' in p) and (len(p['train_interval']) > 0): f.write ( "  TRAIN_INTERVAL = %s\n" % (p['train_interval']) )
+          if ('number_of_trains' in p) and (len(p['number_of_trains']) > 0): f.write ( "  NUMBER_OF_TRAINS = %s\n" % (p['number_of_trains']) )
           f.write ( "}\n" )
           f.write("\n")
 
@@ -582,73 +594,74 @@ def write_viz_out ( vizout, mols, f ):
       f.write ( "\n" );
 
 
-def write_react_out ( rout, dt, f ):
+def write_react_out ( rout, mols, time_step, f ):
 
-    context_scene_name = "Scene"
+    if ("reaction_output_list" in rout) and (len(rout["reaction_output_list"]) > 0):
+        context_scene_name = "Scene"
 
-    f.write("REACTION_DATA_OUTPUT\n{\n")
+        f.write("REACTION_DATA_OUTPUT\n{\n")
 
-    if "output_buf_size" in rout:
-      if len(rout["output_buf_size"].strip()) > 0:
-        f.write("  OUTPUT_BUFFER_SIZE=%s\n" % (rout['output_buf_size']))
+        if "output_buf_size" in rout:
+          if len(rout["output_buf_size"].strip()) > 0:
+            f.write("  OUTPUT_BUFFER_SIZE=%s\n" % (rout['output_buf_size']))
 
-    step_cmd = ""
-    if "rxn_step" in rout:
-      if len(rout["rxn_step"]) > 0:
-        step_cmd = "  STEP=%s\n" % ( rout['rxn_step'] )
-    if len(step_cmd) <= 0:
-      step_cmd = "  STEP=%s\n" % ( dt )
-    f.write(step_cmd)
+        if "rxn_step" in rout:
+          if len(rout["rxn_step"]) > 0:
+            f.write("  STEP=%s\n" % (rout['rxn_step']))
+          else:
+            f.write("  STEP=%s\n" % time_step)
+        else:
+          f.write("  STEP=%s\n" % time_step)
 
-    always_generate = False
-    if "always_generate" in rout:
-      always_generate = rout["always_generate"]
-    if "reaction_output_list" in rout:
-      count_name = ""
-      for rxn_output in rout["reaction_output_list"]:
-        plotting_enabled = True
-        if "plotting_enabled" in rxn_output:
-          plotting_enabled = rxn_output["plotting_enabled"]
-        if always_generate or plotting_enabled:
-          if "rxn_or_mol" in rxn_output:
-            rxn_or_mol = rxn_output["rxn_or_mol"]
-            if rxn_or_mol == 'Reaction':
-                count_name = rxn_output["reaction_name"]
-            elif rxn_or_mol == 'Molecule':
-                count_name = rxn_output["molecule_name"]
-            elif rxn_or_mol == 'MDLString':
-                outputStr = rxn_output["mdl_string"]
-                output_file = rxn_output["mdl_file_prefix"]
-                if outputStr not in ['', None]:
-                    outputStr = '  {%s} =>  "./react_data/seed_" & seed & \"/%s_MDLString.dat\"\n' % (outputStr, output_file)
-                    f.write(outputStr)
-                else:
-                    print('Found invalid reaction output {0}'.format(rxn_output["name"]))
-                continue  ####   <=====-----  C O N T I N U E     H E R E  !!!!!
-            elif rxn_or_mol == 'File':
-                # No MDL is generated for plot items that are plain files
-                continue  ####   <=====-----  C O N T I N U E     H E R E  !!!!!
+        always_generate = False
+        if "always_generate" in rout:
+          always_generate = rout["always_generate"]
+        if "reaction_output_list" in rout:
+          count_name = ""
+          for rxn_output in rout["reaction_output_list"]:
+            plotting_enabled = True
+            if "plotting_enabled" in rxn_output:
+              plotting_enabled = rxn_output["plotting_enabled"]
+            if always_generate or plotting_enabled:
+              if "rxn_or_mol" in rxn_output:
+                rxn_or_mol = rxn_output["rxn_or_mol"]
+                if rxn_or_mol == 'Reaction':
+                    count_name = rxn_output["reaction_name"]
+                elif rxn_or_mol == 'Molecule':
+                    count_name = rxn_output["molecule_name"]
+                elif rxn_or_mol == 'MDLString':
+                    outputStr = rxn_output["mdl_string"]
+                    output_file = rxn_output["mdl_file_prefix"]
+                    if outputStr not in ['', None]:
+                        outputStr = '  {%s} =>  "./react_data/seed_" & seed & \"/%s_MDLString.dat\"\n' % (outputStr, output_file)
+                        f.write(outputStr)
+                    else:
+                        print('Found invalid reaction output {0}'.format(rxn_output["name"]))
+                    continue  ####   <=====-----  C O N T I N U E     H E R E  !!!!!
+                elif rxn_or_mol == 'File':
+                    # No MDL is generated for plot items that are plain files
+                    continue  ####   <=====-----  C O N T I N U E     H E R E  !!!!!
 
-            object_name = rxn_output["object_name"]
-            region_name = rxn_output["region_name"]
-            if rxn_output["count_location"] == 'World':
-                f.write(
-                    "  {COUNT[%s,WORLD]}=> \"./react_data/seed_\" & seed & "
-                    "\"/%s.World.dat\"\n" % (count_name, count_name,))
-            elif rxn_output["count_location"] == 'Object':
-                f.write(
-                    "  {COUNT[%s,%s.%s]}=> \"./react_data/seed_\" & seed & "
-                    "\"/%s.%s.dat\"\n" % (count_name, context_scene_name,
-                                          object_name, count_name, object_name))
-            elif rxn_output["count_location"] == 'Region':
-                f.write(
-                    "  {COUNT[%s,%s.%s[%s]]}=> \"./react_data/seed_\" & seed & "
-                    "\"/%s.%s.%s.dat\"\n" % (count_name, context_scene_name,
-                    object_name, region_name, count_name, object_name, region_name))
-    
+                object_name = rxn_output["object_name"]
+                region_name = rxn_output["region_name"]
+                if rxn_output["count_location"] == 'World':
+                    f.write(
+                        "  {COUNT[%s,WORLD]}=> \"./react_data/seed_\" & seed & "
+                        "\"/%s.World.dat\"\n" % (count_name, count_name,))
+                elif rxn_output["count_location"] == 'Object':
+                    f.write(
+                        "  {COUNT[%s,%s.%s]}=> \"./react_data/seed_\" & seed & "
+                        "\"/%s.%s.dat\"\n" % (count_name, context_scene_name,
+                                              object_name, count_name, object_name))
+                elif rxn_output["count_location"] == 'Region':
+                    f.write(
+                        "  {COUNT[%s,%s.%s[%s]]}=> \"./react_data/seed_\" & seed & "
+                        "\"/%s.%s.%s.dat\"\n" % (count_name, context_scene_name,
+                        object_name, region_name, count_name, object_name, region_name))
 
-    f.write ( "}\n" )
-    f.write ( "\n" );
+
+        f.write ( "}\n" )
+        f.write ( "\n" );
 
 
 data_model_depth = 0
@@ -678,8 +691,7 @@ if len(sys.argv) > 2:
     print ( "Got parameters: " + sys.argv[1] + " " + sys.argv[2] )
     print ( "Reading Data Model: " + sys.argv[1] )
     dm = read_data_model ( sys.argv[1] )
-    #print ( "Dumping Data Model: " + sys.argv[1] )
-    #dump_data_model ( dm )
+    # dump_data_model ( dm )
     print ( "Writing MDL: " + sys.argv[2] )
     write_mdl ( dm, sys.argv[2] )
     print ( "Wrote Data Model found in \"" + sys.argv[1] + "\" to MDL file \"" + sys.argv[2] + "\"" )
