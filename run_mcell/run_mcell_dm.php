@@ -410,8 +410,8 @@ if (strlen($what) > 0) {
 
         // Overwrite parameters in the data model for all parameters that are being swept with current values for this pass
         
-        $run_from_path = "run_files/".$users_name; 
-        $mcell_path = "../../mcell"; 
+        $run_from_path = "run_files/".$users_name."/output_data";
+        $mcell_path = "../../../mcell";
 
         for ($i=0; $i<count($sweep_pars); $i++) {
           $sw_name = $sweep_pars[$i]["sweep_name"];
