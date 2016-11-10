@@ -111,7 +111,7 @@ if (in_array("REMOTE_USER",array_keys($_SERVER))) {
 
 
 
-<form action="run_mcell_dm.php" method="post">
+<form action="run_mcell_dm_range.php" method="post">
 
 <?php
 
@@ -410,8 +410,8 @@ if (strlen($what) > 0) {
 
         // Overwrite parameters in the data model for all parameters that are being swept with current values for this pass
         
-        $run_from_path = getcwd()."/run_files/".$users_name."/output_data";
-        $mcell_path = "../../../mcell";
+        $run_from_path = "run_files/".$users_name; 
+        $mcell_path = "../../mcell"; 
 
         for ($i=0; $i<count($sweep_pars); $i++) {
           $sw_name = $sweep_pars[$i]["sweep_name"];
@@ -546,8 +546,6 @@ for ($seed_folder_index=0; $seed_folder_index<count($seed_folders); $seed_folder
 
 
 <center>
-
-<!-- <center><?php phpinfo(INFO_VARIABLES); ?></center> -->
 
 <br/>
 
