@@ -2,64 +2,7 @@
 
 <head>
 <title>MCell Web Development - Run MCell Data Model</title>
-<link rel="stylesheet" type="text/css" href="../style/def.css" />
-
-<style type="text/css">
-
-/* From phpinfo style */
-
-body {background-color: #fff; color: #222; font-family: sans-serif;}
-pre {margin: 0; font-family: monospace;}
-a:link {color: #009; text-decoration: none;}
-a:hover {text-decoration: underline;}
-table {border-collapse: collapse; border: 0; width: 934px; box-shadow: 2px 4px 6px #008;}
-.center {text-align: center;}
-.center table {margin: 1em auto; text-align: left;}
-.center th {text-align: center !important;}
-th {border: 1px solid #666; font-size: 90%; vertical-align: baseline; padding: 4px 5px; background-color: #ccc;}
-td {border: 1px solid #666; font-size: 75%; vertical-align: baseline; padding: 4px 5px; background-color: #eee;}
-h1 {font-size: 150%;}
-h2 {font-size: 125%;}
-.p {text-align: left;}
-.e {background-color: #ccf; width: 300px; font-weight: bold;}
-.h {background-color: #99c; font-weight: bold;}
-.v {background-color: #ddd; max-width: 300px; overflow-x: auto;}
-.v i {color: #999;}
-img {float: right; border: 0;}
-hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
-input[type=text] { font-weight: bold; padding: 4px 8px 2px 4px; } /* padding is top, right, bottom, left */
-button[type=submit], input[type=button], input[type=submit], input[type=reset] { font-weight: bold; font-size: 110%; padding: 4px 8px 2px 6px; box-shadow: 1px 2px 3px #008; }
-select { font-weight: bold; font-size: 110%; padding: 4px 8px 2px 6px; box-shadow: 1px 2px 3px #008; }
-
-/* Additional styles */
-/* Body for the entire document */
-body {
-  background-color: #def;
-  color: #000033;
-  margin-left: 10px;
-  margin-right: 10px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-}
-
-table, th, td {
-  border: 1px solid black;
-  margin-left: 10px;
-  margin-right: 10px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  /* border-collapse: collapse; */
-}
-
-.hidden {
-  display: none;
-}
-.visible {
-  display: inline;
-}
-
-</style>
-
+<link rel="stylesheet" type="text/css" href="run_style.css">
 
 <script>
 
@@ -88,11 +31,7 @@ function sweep_checked ( s ) {
 </head>
 
 
-
-
-
 <body>
-
 
 <?php
 $users_name = "";
@@ -104,11 +43,8 @@ if (in_array("REMOTE_USER",array_keys($_SERVER))) {
 ?>
 
 <hr/>
-
 <center><h1 style="font-size:200%">MCell Web Development at <a href="../..">mcell.snl.salk.edu</a> <?php echo $users_name_shown; ?> </h1></center>
-
 <hr/>
-
 
 
 <form action="run_mcell_dm.php" method="post">
