@@ -281,13 +281,96 @@ $run_folders = array();
 */
 
 if (strlen($what) > 0) {
+
   $sep = "=======================================================================================";
+
   if (strcmp($what,"clear") == 0) {
+
     $output = shell_exec ("rm -Rf run_files/".$users_name."/*; ls -lR");
     $output = "\n";
+
   } elseif (strcmp($what,"load") == 0) {
+
     $output = "\n";
+
+  } elseif (strcmp($what,"runall") == 0) {
+
+    // Run the data model as it is without any changes from the form (ignore parameter settings and seed settings) 
+
+    $output = "CWD = ".getcwd()."\n";
+    if (strlen($model_file_name) > 0) {
+      // Read the data model
+      $json_string = file_get_contents ( $model_file_name );
+      $data_model = json_decode ( $json_string, true );
+      // Get the seed range
+      $first_seed = $data_model["mcell"]["simulation_control"]["start_seed"];
+      $last_seed = $data_model["mcell"]["simulation_control"]["end_seed"];
+
+      $run_from_path = getcwd()."/run_files/".$users_name;
+      $result = shell_exec ("python run_data_model_mcell.py ".$model_file_name." -pd ".$run_from_path." -b ".getcwd()."/mcell -fs ".$first_seed." -ls ".$last_seed);
+      $output = $output.$result."\n\n";
+
+      $output = $output."<hr/> Plot data layout:<br/>";
+
+      $json_string = file_get_contents ( $run_from_path."/data_layout.json", "r" );
+      $data_layout_dict = json_decode ( $json_string, true );
+      $data_layout_list = $data_layout_dict["data_layout"];
+      $layout_list_count = count($data_layout_list);
+
+      $index_counting_array = array();
+      $num_runs = 1;
+      for ($i=0; $i<$layout_list_count; $i++) {
+        array_push ( $index_counting_array, 0 );
+        $layout_level_name = $data_layout_list[$i][0];
+        $layout_level_item_list = $data_layout_list[$i][1];
+        $output = $output."<br/>".$layout_level_name."<br/>";
+        if ( ($layout_level_name != "dir") && ($layout_level_name != "file_type") && ($layout_level_name != "SEED") ) {
+          $num_runs = $num_runs * count($layout_level_item_list);
+          $output = $output."<br/>".$layout_level_name." is a level!!<br/>";
+        }
+      }
+      $output = $output."<br/>Total Runs = ".$num_runs."<br/>";
+      
+      $run_num = 0;
+
+      while ($run_num < $num_runs) {
+        $run_path = $run_from_path."";
+        for ($i=0; $i<$layout_list_count; $i++) {
+          $layout_level_name = $data_layout_list[$i][0];
+          if ($layout_level_name == "dir") {
+            // A "dir" level is just a directory path that needs to be added.
+            $run_path = $run_path."/".$data_layout_list[$i][1][0];
+          } elseif ($layout_level_name == "file_type") {
+            // Don't do anything with the file type since it's handled explicitly later on
+            // $run_path = $run_path."/".$data_layout_list[$i][1][0];
+          } elseif ($layout_level_name == "SEED") {
+            // Don't do anything with seeds since they're handled by the "glob" later on
+          } else {
+            $run_path = $run_path."/".$data_layout_list[$i][0]."_index_".$index_counting_array[$i];
+          }
+        }
+        $output = $output."<br/>Run Path ".$run_num." is ".$run_path."<br/>";
+        array_push ( $run_folders, $run_path );
+
+        // Increment the counters and carry as needed
+        $index_counting_array[$layout_list_count-1] += 1;
+        for ($i=$layout_list_count-1; $i>=0; $i=$i-1) {
+          if ( ($data_layout_list[$i][0]=="file_type") || ($index_counting_array[$i] >= count($data_layout_list[$i][1])) ) {
+            $index_counting_array[$i] = 0;
+            if (($i-1) >= 0) {
+              $index_counting_array[$i-1] += 1;
+            }
+          }
+        }
+        $run_num = $run_num + 1;
+      }
+
+    } else {
+      $output = "No Data Model";
+    }
+
   } elseif (strcmp($what,"run") == 0) {
+
     if (strlen($model_file_name) > 0) {
       $output = "";
       $result = "";
@@ -427,6 +510,7 @@ if ($total_mcell_runs > $run_limit) {
   $button_style = "disabled style=\"background-color: #f88;\"";
 }
 echo " &nbsp; &nbsp;  &nbsp; &nbsp; <button ".$button_style." type=\"submit\" name=\"what\" value=\"run\">".$mcell_run_label."</button>\n";
+echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"runall\">Run All</button>\n";
 echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"clear\">Refresh</button>\n";
 echo "</p>";
 
