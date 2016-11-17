@@ -87,18 +87,19 @@ span.regular {
 /* Links */
 a:link {
   text-decoration: none;
-  color: #bb0000;
+  color: #4444ff;
   background-color: inherit;
 }
 
 a:hover {
-  color: #ff4444;
+  color: #aa44ff;
   background-color: inherit;
+  text-decoration: underline;
 }
 
 a:visited {
   text-decoration: none;
-  color: #aa00aa;
+  color: #0000bb;
   background-color: inherit;
 }
 
@@ -106,7 +107,7 @@ a:visited {
 a:active {
   text-decoration: none;
   /* color: inherit; */
-  color: #8800ee;
+  color: #4444ff;
   /* color: #ff4444; */
   background-color: inherit;
 }

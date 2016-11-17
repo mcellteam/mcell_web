@@ -76,14 +76,14 @@ This site is being used for MCell Web Development.
 Projects include:
 </p>
 <ul>
+<li>Running MCell with a web interface</li>
 <li>A local Galaxy Server</li>
-<li>Tools for running MCell via the web</li>
 </ul>
 <p class="indent1">
 These are just a start.
 </p>
 <hr />
-<h2>History:</h2>
+<h2>Project History:</h2>
 <table class="fixed_width"><tr><td><pre class="pretext">
 Date:   Thu Sep 22 17:17:00 2016 -0700
 
