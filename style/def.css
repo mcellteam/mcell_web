@@ -24,6 +24,10 @@ body {
   margin: 10px;
   background-color: #aaaaaa;
 }
+.leftside1 {
+  margin-left: 30px;
+  background-color: #aaaaaa;
+}
 .rightside {
   margin: 10px;
   background-color: #cccccc;

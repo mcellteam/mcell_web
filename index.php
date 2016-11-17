@@ -14,24 +14,24 @@
 
 <table class="zeromargins" width="100%" height="100%" border="0">
  <colgroup>
-  <col width="20%" />
+  <col width="25%" />
   <col />
  </colgroup>
  <tr valign="top">
   <td class="leftside">
    <p class="leftside">Run MCell:</a></p>
-   <p class="leftside">&nbsp; &nbsp;<a href="run_mcell/run_mcell_mdl.php">MDL</a></p>
-   <p class="leftside">&nbsp; &nbsp;<a href="run_mcell/run_mcell_simple.php">Data Model</a></p>
-   <p class="leftside">&nbsp; &nbsp;<a href="run_mcell/run_mcell_dm_range.php">Data Model with Ranges</a></p>
-   <p class="leftside">&nbsp; &nbsp;<a href="run_mcell/run_mcell_dm.php">Data Model with Parameters</a></p>
+   <p class="leftside1"><a href="run_mcell/run_mcell_mdl.php">MDL</a></p>
+   <p class="leftside1"><a href="run_mcell/run_mcell_simple.php">Data Model</a></p>
+   <p class="leftside1"><a href="run_mcell/run_mcell_dm_range.php">Data Model Range Sweep</a></p>
+   <p class="leftside1"><a href="run_mcell/run_mcell_dm.php">Data Model General Sweep</a></p>
    <hr />
    <p class="leftside">Browse Files:</a></p>
-   <p class="leftside">&nbsp; &nbsp;<a href="run_mcell/mdl_file_browser.php">MDL File Browser</a></p>
-   <p class="leftside">&nbsp; &nbsp;<a href="run_mcell/data_model_browser.php">Data Model Browser</a></p>
+   <p class="leftside1"><a href="run_mcell/mdl_file_browser.php">MDL File Browser</a></p>
+   <p class="leftside1"><a href="run_mcell/data_model_browser.php">Data Model Browser</a></p>
    <hr />
    <p class="leftside">Web Site:</a></p>
-   <p class="leftside">&nbsp; &nbsp;<a href="mysql-edit.php">Database Administration</a></p>
-   <p class="leftside">&nbsp; &nbsp;<a href="run_mcell/php_show_info.php">PHP Information</a></p>
+   <p class="leftside1"><a href="mysql-edit.php">Database Administration</a></p>
+   <p class="leftside1"><a href="run_mcell/php_show_info.php">PHP Information</a></p>
   </td>
   <td class="rightside">
 
