@@ -14,5 +14,5 @@ The interface allows for multiple parameters to be swept and provides a total ru
 from generating more runs than expected.
 
 
-![MCellWeb](share/Screenshot_from_2016-10-14_9pm.png?raw=true "MCell running in a browser")
+![MCellWeb](share/Screenshot_2016-11-17.png?raw=true "MCell running in a browser")
 
