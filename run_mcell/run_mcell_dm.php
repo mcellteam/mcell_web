@@ -70,7 +70,6 @@ if (in_array("REMOTE_USER",array_keys($_SERVER))) {
 <form action="run_mcell_dm.php" method="post">
 
 <?php
-$total_mcell_runs = 1;
 
 echo "<center>";
 
@@ -141,7 +140,7 @@ $dm_pars = null;
 
 if (strcmp($what,"load") == 0) {
   // Load the new data model
-  echo "<p><h1>LOAD from FILE</h1></p>\n";
+  // echo "<p><h1>LOAD from FILE</h1></p>\n";
 
   if (strlen($model_file_name)>0) {
 
@@ -150,59 +149,35 @@ if (strcmp($what,"load") == 0) {
 
     $dm_pars = $data_model["mcell"]["parameter_system"]["model_parameters"];
   }
+
 } else {
-  // Build the $dm_pars array from the previous form data while preserving the order of the parameters
-  echo "<p><h1>LOAD from POST</h1></p>\n";
-  $dm_par_names = array();
-  $dm_pars = array();
-  $par_index = 0;
-  foreach ($_POST as $pkey => $pval) {
-    $key_len = strlen($pkey);
+  // Load the data model and then update the $dm_pars array from the previous form data
+  // echo "<p><h1>LOAD from POST</h1></p>\n";
 
-    $key_pos = strrpos($pkey,"_sweep");
-    if (($key_len-$key_pos) == strlen("_sweep")) {
-      $par_name = substr($pkey,0,$key_pos);
-      if (array_search($par_name,$dm_par_names) == false) {
-        // This name isn't in the list yet
-        array_push ( $dm_par_names, $par_name );
-        $dm_pars[$par_name] = array("par_name"=>$par_name);
+  if (strlen($model_file_name)>0) {
+
+    $json_string = file_get_contents ( $model_file_name );
+    $data_model = json_decode ( $json_string, true );
+
+    $dm_pars = $data_model["mcell"]["parameter_system"]["model_parameters"];
+
+    foreach ($dm_pars as &$par) {
+      $par_name = $par["par_name"];
+      if (in_array("sweep_".$par_name,array_keys($_POST))) {
+        // If the name is found, that means it is true
+        $par["sweep_enabled"] = true;
+      } else {
+        $par["sweep_enabled"] = false;
       }
-      $dm_pars[$par_name]["sweep_expression"] = $pval;
-      $dm_pars[$par_name]["par_units"] = "";
-      $dm_pars[$par_name]["par_description"] = "";
-      $dm_pars[$par_name]["sweep_enabled"] = true;
-      echo "<p>Found a sweep: _POST[".$pkey."] = ".$pval." = \"".$par_name."\"</p>";
+      if (in_array($par_name."_scalar",array_keys($_POST))) {
+        $par["par_expression"] = $_POST[$par_name."_scalar"];
+      }
+      if (in_array($par_name."_sweep",array_keys($_POST))) {
+        $par["sweep_expression"] = $_POST[$par_name."_sweep"];
+      }
     }
 
-    $key_pos = strrpos($pkey,"_scalar");
-    if (($key_len-$key_pos) == strlen("_scalar")) {
-      $par_name = substr($pkey,0,$key_pos);
-      if (array_search($par_name,$dm_par_names) == false) {
-        // This name isn't in the list yet
-        array_push ( $dm_par_names, $par_name );
-        $dm_pars[$par_name] = array("par_name"=>$par_name);
-      }
-      $dm_pars[$par_name]["par_expression"] = $pval;
-      $dm_pars[$par_name]["par_units"] = "";
-      $dm_pars[$par_name]["par_description"] = "";
-      $dm_pars[$par_name]["sweep_enabled"] = false;
-      echo "<p>Found a scalar: _POST[".$pkey."] = ".$pval." = \"".$par_name."\"</p>";
-    }
   }
-
-  // Get sweep information from HTML Form
-  /*
-  if (in_array("sweep_".$par_name,array_keys($_POST))) {
-    // print ( "sweep_".$par_name." is ".$_POST["sweep_".$par_name]."<br/>" );
-    $sweep_checked = true;
-  }
-  if (in_array($par_name."_end",array_keys($_POST))) {
-    $end_val = $_POST[$par_name."_end"];
-  }
-  if (in_array($par_name."_step",array_keys($_POST))) {
-    $step_val = $_POST[$par_name."_step"];
-  }
-  */
 }
 
 if ($dm_pars != null) {
@@ -257,6 +232,10 @@ if ($dm_pars != null) {
   }
 }
 
+$total_mcell_runs = 1;
+
+//$total_mcell_runs = shell_exec ("python run_data_model_mcell.py ".$model_file_name." --get_num_runs");
+
 $mcell_run_label = "Run MCell";
 if ($total_mcell_runs > 1) {
   $mcell_run_label = sprintf("Run MCell x %d", $total_mcell_runs);
@@ -275,192 +254,13 @@ if (($total_mcell_runs > 1) && ($total_mcell_runs >= (3 * $run_limit / 4) )) {
 if ($total_mcell_runs > $run_limit) {
   $button_style = "disabled style=\"background-color: #f88;\"";
 }
-echo " &nbsp; &nbsp;  &nbsp; &nbsp; <button ".$button_style." type=\"submit\" name=\"what\" value=\"run\">".$mcell_run_label."</button>\n";
-echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"runall\">Run All</button>\n";
-echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"clear\">Refresh</button>\n";
+echo " &nbsp; &nbsp;  &nbsp; &nbsp; <button ".$button_style." type=\"submit\" name=\"what\" value=\"runall\">".$mcell_run_label."</button>\n";
+echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"clear\">Clear</button>\n";
 echo "</p>";
-
-echo "</center>";
-
-
-?>
-
-<!--
-$pars = NULL;
-
-// Show the parameters if they are available
-
-if (strlen($model_file_name)>0) {
-
-  $json_string = file_get_contents ( $model_file_name );
-  $data_model = json_decode ( $json_string, true );
-
-  $pars = $data_model["mcell"]["parameter_system"]["model_parameters"];
-
-  if (strcmp($what,"load") != 0) {
-    // This is NOT a new load
-    // Change the data model parameters to match those in the form
-    $npars = count($pars);
-    for ($i=0; $i<$npars; $i++) {
-      if (in_array($pars[$i]["par_name"],array_keys($_POST))) {
-        // Assign both the scalar par_expression and the sweep_expression
-        $data_model["mcell"]["parameter_system"]["model_parameters"][$i]["par_expression"] = $_POST[$pars[$i]["par_name"]];
-      }
-    }
-
-    // This reassignment appears to be needed!!
-    $pars = $data_model["mcell"]["parameter_system"]["model_parameters"];
-
-  }
-
-  if (count($pars) > 0) {
-    // Display the parameters in a table with sweep controls
-
-    // var_dump ( $pars );
-    print ( "<table style=\"width:95%\">\n" );
-    print ( "<tr><th style=\"width:5%\">Sweep</th><th style=\"width:70%\">Name &nbsp; = &nbsp; Value &nbsp; (units)</th><th>Description</th></tr>\n" );
-    foreach ($pars as &$par) {
-      print ( "<tr>\n" );
-      $par_name = $par["par_name"];
-      $par_value = $par["par_expression"];
-      $sweep_expr = "";
-      if (array_key_exists("sweep_expression",$par)) {
-        $sweep_expr = $par["sweep_expression"];
-
-      $sweep_checked = false;
-      $start_val = "";
-      $end_val = "";
-      $step_val = "";
-      if (strcmp($what,"load") == 0) {
-        // This is a new load, so get sweep information from Data Model
-        if (array_key_exists("sweep_expression",$par)) {
-          $sweep_expr = $par["sweep_expression"];
-          $num_seps = substr_count($sweep_expr,":");
-          if ($num_seps <= 0) {
-            // This is a scalar value
-            $start_val = $sweep_expr;
-            $end_val =  $sweep_expr;
-            $step_val = "1";
-          } else {
-            $parts = preg_split("[:]", $sweep_expr);
-            if ($num_seps == 1) {
-              $start_val = $parts[0];
-              $end_val = $parts[1];
-              $step_val = "1";
-            } else { // if ($num_seps >= 2) {
-              $start_val = $parts[0];
-              $end_val = $parts[1];
-              $step_val = $parts[2];
-            }
-          }
-        }
-        if (array_key_exists("sweep_enabled",$par)) {
-          if ($par["sweep_enabled"]) {
-            $sweep_checked = true;
-            if (strlen($start_val) > 0) {
-              $par_value = $start_val;
-            }
-          }
-        }
-      } else {
-        // Get sweep information from HTML Form
-        if (in_array("sweep_".$par_name,array_keys($_POST))) {
-          // print ( "sweep_".$par_name." is ".$_POST["sweep_".$par_name]."<br/>" );
-          $sweep_checked = true;
-        }
-        if (in_array($par_name."_end",array_keys($_POST))) {
-          $end_val = $_POST[$par_name."_end"];
-        }
-        if (in_array($par_name."_step",array_keys($_POST))) {
-          $step_val = $_POST[$par_name."_step"];
-        }
-      }
-
-      $sweep_visibility = "hidden";
-      if ($sweep_checked) {
-        $sweep_visibility = "visible";
-        print ( "  <td><center><input type=\"checkbox\" name=\"sweep_".$par_name."\" value=\"1\" checked=\"1\" onclick=\"sweep_checked('sweep_".$par_name."')\"></center></td>" );
-      } else {
-        print ( "  <td><center><input type=\"checkbox\" name=\"sweep_".$par_name."\" value=\"1\"               onclick=\"sweep_checked('sweep_".$par_name."')\"></center></td>" );
-      }
-      print ( "  <td>" );
-      print ( "<b>".$par_name."</b> = " );
-
-      print ( "<input type=\"text\" size=\"12\" name=\"".$par_name."\" value=\"".$par_value."\">" );
-
-      print ( "<span id=\"range_".$par_name."\" class=\"".$sweep_visibility."\"> &nbsp; to &nbsp; <input type=\"text\" size=\"12\" name=\"".$par_name."_end\" value=\"".$end_val."\">" );
-      print ( " &nbsp; by  &nbsp; <input type=\"text\" size=\"12\" name=\"".$par_name."_step\" value=\"".$step_val."\"></span>" );
-
-      if (strlen($par["par_units"]) > 0) {
-        print ( " &nbsp; (".$par["par_units"].")" );
-      }
-      print ( "</td>\n" );
-      print ( "  <td>" );
-      if (strlen($par["par_description"]) > 0) {
-        print ( $par["par_description"] );
-      }
-      print ( "</td>\n" );
-      print ( "</tr>\n" );
-    }
-    unset($par);
-    print ( "</table>\n" );
-  }
-}
-
-$total_mcell_runs = 1;
-
-$sweep_pars = array();
-
-if ($pars != NULL) {
-  // Load parameters from the default form settings while building the $sweep_pars list (start, step, count)
-  $npars = count($pars);
-  for ($i=0; $i<$npars; $i++) {
-    if (in_array($pars[$i]["par_name"],array_keys($_POST))) {
-      $par_name = $pars[$i]["par_name"];
-      $par_expr = $_POST[$par_name];
-      $data_model["mcell"]["parameter_system"]["model_parameters"][$i]["par_expression"] = $par_expr;
-      $sweep_flag_name = "sweep_".$par_name;
-      if (in_array($sweep_flag_name,array_keys($_POST))) {
-        // The checkbox field only appears to be in the $_POST when it is checked, otherwise there should be another value check here
-        $sweep_start_name = $par_name;
-        $sweep_end_name = $par_name."_end";
-        $sweep_step_name = $par_name."_step";
-        $sweep_start = 0.0;        sscanf($_POST[$par_name],        "%f", $sweep_start);
-        $sweep_end = $sweep_start; sscanf($_POST[$sweep_end_name],  "%f", $sweep_end  );
-        $sweep_step  = 1.0;        sscanf($_POST[$sweep_step_name], "%f", $sweep_step );
-        if ($sweep_step > 0) {
-          $num_steps = 1 + floor ( ($sweep_end - $sweep_start) / $sweep_step );
-        } else {
-          $num_steps = 1;
-        }
-        array_push ( $sweep_pars, array("sweep_name"=>$par_name,"sweep_start"=>$sweep_start, "sweep_step"=>$sweep_step, "num_steps"=>$num_steps, "step_num"=>0) );
-        $total_mcell_runs = $total_mcell_runs * $num_steps;
-      }
-    }
-  }
-}
-
-$total_mcell_runs = $total_mcell_runs * ( 1 + $end_seed - $start_seed );
 
 $output = "";
 
 $run_folders = array();
-
-/*
-  Old Format (pure dictionary does not preserve order):
-    {
-      "dr" : [ 10000, 30000, 50000 ],
-      "delay" : [ 0.0001, 0.0051 ],
-      "offset" : [ 1.0e-5, 0.00081, 0.00161 ]
-    }
-
-  New Format (list preserves order):
-    [
-      { "name": "dr", "values" : [ 10000, 30000, 50000 ] },
-      { "name": "delay", "values" : [ 0.0001, 0.0051 ] },
-      { "name": "offset", "values" : [ 1.0e-5, 0.00081, 0.00161 ] }
-    ]
-*/
 
 if (strlen($what) > 0) {
 
@@ -481,15 +281,25 @@ if (strlen($what) > 0) {
 
     $output = "CWD = ".getcwd()."\n";
     if (strlen($model_file_name) > 0) {
+
+      $run_from_path = getcwd()."/run_files/".$users_name;
+
       // Read the data model
       $json_string = file_get_contents ( $model_file_name );
       $data_model = json_decode ( $json_string, true );
-      // Get the seed range
-      $first_seed = $data_model["mcell"]["simulation_control"]["start_seed"];
-      $last_seed = $data_model["mcell"]["simulation_control"]["end_seed"];
 
-      $run_from_path = getcwd()."/run_files/".$users_name;
-      $result = shell_exec ("python run_data_model_mcell.py ".$model_file_name." -pd ".$run_from_path." -b ".getcwd()."/mcell -fs ".$first_seed." -ls ".$last_seed);
+      // Substitute the updated parameters
+      $dm_pars = $data_model["mcell"]["parameter_system"]["model_parameters"] = $dm_pars;
+
+      // Encode the data model as JSON and write it to the file
+      $json_output = json_encode ( $data_model );
+      file_put_contents ( $run_from_path."/data_model.json", $json_output );
+
+      // Set the seed range in the data model
+      $data_model["mcell"]["simulation_control"]["start_seed"] = $start_seed;
+      $data_model["mcell"]["simulation_control"]["end_seed"]= $end_seed;
+
+      $result = shell_exec ("python run_data_model_mcell.py ".$run_from_path."/data_model.json -pd ".$run_from_path." -b ".getcwd()."/mcell -fs ".$start_seed." -ls ".$end_seed);
       $output = $output.$result."\n\n";
 
       $output = $output."<hr/> Plot data layout:<br/>";
@@ -551,150 +361,8 @@ if (strlen($what) > 0) {
       $output = "No Data Model";
     }
 
-  } elseif (strcmp($what,"run") == 0) {
-
-    if (strlen($model_file_name) > 0) {
-      $output = "";
-      $result = "";
-      // Re-read the data model
-      $json_string = file_get_contents ( $model_file_name );
-      $data_model = json_decode ( $json_string, true );
-      // Get the parameters
-      $pars = $data_model["mcell"]["parameter_system"]["model_parameters"];
-
-      // Sweep through the parameter space
-      
-      // Start by writing the [ {"name:"p1", "values":[values] }, {"name:"p1", "values":[values] } ] JSON list
-      $run_pars_file = fopen ( "run_files/".$users_name."/run_parameters.json", "w" );
-      fwrite ( $run_pars_file, "[\n" );
-
-      $comma = ",";
-      $sweep_count = count($sweep_pars);
-      for ($i=0; $i<$sweep_count; $i++) {
-        $sw_name = $sweep_pars[$i]["sweep_name"];
-        $sw_steps = $sweep_pars[$i]["num_steps"];
-        $sw_start = $sweep_pars[$i]["sweep_start"];
-        $sw_step = $sweep_pars[$i]["sweep_step"];
-        $sw_end = $sw_start + (($sw_steps-1) * $sw_step);
-        fwrite ( $run_pars_file, "  { \"name\": \"".$sw_name."\", \"values\" : [" );
-        for ($index=0; $index<$sw_steps; $index++ ) {
-          $comma = ",";
-          if ($index == $sw_steps-1) {
-            $comma = "";
-          }
-          fprintf ( $run_pars_file, " %.15g".$comma, $sw_start + ($index * $sw_step) );
-        }
-        $comma = ",";
-        if ($i == $sweep_count-1) {
-          $comma = "";
-        }
-        fwrite ( $run_pars_file, " ] }".$comma."\n" );
-      }
-
-      fwrite ( $run_pars_file, "]\n" );
-      fclose ( $run_pars_file );
-
-      $run_num = 0;
-      while ($run_num < $total_mcell_runs) {
-
-        // Load parameters from the default form settings
-
-        $npars = count($pars);
-        for ($i=0; $i<$npars; $i++) {
-          if (in_array($pars[$i]["par_name"],array_keys($_POST))) {
-            $par_name = $pars[$i]["par_name"];
-            $par_expr = $_POST[$par_name];
-            $data_model["mcell"]["parameter_system"]["model_parameters"][$i]["par_expression"] = $par_expr;
-            $sweep_flag_name = "sweep_".$par_name;
-          }
-        }
-
-        // Overwrite parameters in the data model for all parameters that are being swept with current values for this pass
-        
-        $run_from_path = getcwd()."/run_files/".$users_name."/output_data";
-        $mcell_path = "../../../mcell";
-
-        for ($i=0; $i<count($sweep_pars); $i++) {
-          $sw_name = $sweep_pars[$i]["sweep_name"];
-          $sw_start = $sweep_pars[$i]["sweep_start"];
-          $sw_step = $sweep_pars[$i]["sweep_step"];
-          $step_num = $sweep_pars[$i]["step_num"];
-          $val_now = $sw_start + ($step_num*$sw_step);
-          $str_val_now = sprintf("%g", $val_now);
-          $run_from_path = $run_from_path."/".$sw_name."_index_".$step_num;
-          $mcell_path = "../".$mcell_path;
-          // print ( "<br/>Parameter <b>".$sw_name."</b> is <b>".$val_now." (\"".$str_val_now."\")</b> at step <b>".$step_num."</b>\n" );
-
-          for ($j=0; $j<$npars; $j++) {
-            if ($pars[$j]["par_name"] == $sw_name) {
-              $data_model["mcell"]["parameter_system"]["model_parameters"][$j]["par_expression"] = $str_val_now;
-              break;
-            }
-          }
-        }
-
-        array_push ( $run_folders, $run_from_path );
-
-        // Create directories as needed
-        shell_exec ("mkdir -p ".$run_from_path);
-
-        // Encode the data model as JSON and write it to the file
-        $json_output = json_encode ( $data_model );
-        file_put_contents ( $run_from_path."/data_model.json", $json_output );
-        for ($seed = $start_seed; $seed <= $end_seed; $seed++) {
-          // print ( "<br/>Seed is <b>".$seed."</b>\n" );
-          $dm_out = shell_exec ("python data_model_to_mdl.py ".$run_from_path."/data_model.json ".$run_from_path."/data_model.mdl");
-          $output = $output."\n\n".$sep."\n".$dm_out.$sep."\n";
-          $mcell_command = "cd ".$run_from_path."; ls -l; ".$mcell_path." -seed ".$seed." data_model.mdl";
-          $output = $output."\n\n".$sep."\n    ".$mcell_command."\n".$sep."\n";
-          $result = shell_exec ($mcell_command);
-          $output = $output.$result."\n\n";
-          $run_num += 1;
-        }
-
-
-        // Increment the step number(s) in the sweep parameters
-
-        $num_sweep_pars = count($sweep_pars);
-        for ($spi=0; $spi<$num_sweep_pars; $spi++) {
-          $sweep_pars[$spi]["step_num"] += 1;
-          if ($sweep_pars[$spi]["step_num"] < $sweep_pars[$spi]["num_steps"]) {
-            // We have not rolled over, so we're done and can exit the for loop
-            break;
-          } else {
-            // We have rolled over, so reset to 0 and allow the loop to continue
-            $sweep_pars[$spi]["step_num"] = 0;
-          }
-        }
-
-      }
-
-    }
   }
 }
-
-$mcell_run_label = "Run MCell";
-if ($total_mcell_runs > 1) {
-  $mcell_run_label = sprintf("Run MCell x %d", $total_mcell_runs);
-}
-
-echo "<p style=\"padding-top:20\">";
-echo " &nbsp; &nbsp; <b>Seed Range:</b> &nbsp; <input type=\"text\" size=\"4\" min=\"1\" name=\"start_seed\" value=".$start_seed.">\n";
-echo " &nbsp; to &nbsp;                        <input type=\"text\" size=\"4\" min=\"1\" name=\"end_seed\" value=".$end_seed.">\n";
-
-echo " &nbsp; &nbsp; <b>Run Limit:</b> &nbsp; <input type=\"text\" size=\"4\" min=\"1\" name=\"run_limit\" value=".$run_limit.">\n";
-
-$button_style = "";
-if (($total_mcell_runs > 1) && ($total_mcell_runs >= (3 * $run_limit / 4) )) {
-  $button_style = "style=\"background-color: #ee6;\"";
-}
-if ($total_mcell_runs > $run_limit) {
-  $button_style = "disabled style=\"background-color: #f88;\"";
-}
-echo " &nbsp; &nbsp;  &nbsp; &nbsp; <button ".$button_style." type=\"submit\" name=\"what\" value=\"run\">".$mcell_run_label."</button>\n";
-echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"runall\">Run All</button>\n";
-echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"clear\">Refresh</button>\n";
-echo "</p>";
 
 echo "</center>";
 
@@ -743,18 +411,18 @@ for ($seed_folder_index=0; $seed_folder_index<count($seed_folders); $seed_folder
 }
 
 ?>
--->
+
 
 </form>
 
 
 <center>
 
-<!-- -->
+<!--
 <center><?php phpinfo(INFO_VARIABLES); ?></center>
 
 <center><?php phpinfo(); ?></center>
-<!-- -->
+-->
 
 <br/>
 
