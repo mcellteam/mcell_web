@@ -299,7 +299,7 @@ if (strlen($what) > 0) {
       $data_model["mcell"]["simulation_control"]["start_seed"] = $start_seed;
       $data_model["mcell"]["simulation_control"]["end_seed"]= $end_seed;
 
-      $result = shell_exec ("python run_data_model_mcell.py ".$run_from_path."/data_model.json -pd ".$run_from_path." -b ".getcwd()."/mcell -fs ".$start_seed." -ls ".$end_seed);
+      $result = shell_exec ("python run_data_model_mcell.py ".$run_from_path."/data_model.json -pd ".$run_from_path." -b ".getcwd()."/mcell -fs ".$start_seed." -ls ".$end_seed." -rl ".$run_limit);
       $output = $output.$result."\n\n";
 
       $output = $output."<hr/> Plot data layout:<br/>";
