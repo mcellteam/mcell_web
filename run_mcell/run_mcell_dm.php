@@ -4,23 +4,43 @@
 <title>MCell Web Development - Run MCell Data Model</title>
 <link rel="stylesheet" type="text/css" href="run_style.css">
 
+
+<style type="text/css">
+
+.hidden {
+  display: none;
+}
+.visible {
+  display: inline;
+}
+</style>
+
+
 <script>
 
 function sweep_checked ( s ) {
-  // console.log ( s );
+  console.log ( "sweep_checked called with " + s );
   // alert( s );
   sweep_checkboxes = document.getElementsByName(s);
   if (sweep_checkboxes.length == 1) {
     sweep_item_name = s.substr("sweep_".length);
-    range_id = "range_" + sweep_item_name;
-    range_span = document.getElementById(range_id);
+    console.log ( "sweep_item_name is " + sweep_item_name );
+    sweep_id = sweep_item_name + "_sweep";
+    console.log ( "sweep_id is " + sweep_id );
+    scalar_id = sweep_item_name + "_scalar";
+    console.log ( "scalar_id is " + scalar_id );
+
+    sweep_span = document.getElementById(sweep_id);
+    scalar_span = document.getElementById(scalar_id);
     if ( sweep_checkboxes[0].checked ) {
-      // Show the range fields
-      range_span.className = "visible";
+      // Show the sweep field and hide the scalar field
+      sweep_span.className = "visible";
+      scalar_span.className = "hidden";
       // console.log( s + " is checked" );
     } else {
-      // Hide the range fields
-      range_span.className = "hidden";
+      // Hide the sweep field and show the scalar field
+      sweep_span.className = "hidden";
+      scalar_span.className = "visible";
       // console.log( s + " is NOT checked" );
     }
   }
@@ -50,6 +70,7 @@ if (in_array("REMOTE_USER",array_keys($_SERVER))) {
 <form action="run_mcell_dm.php" method="post">
 
 <?php
+$total_mcell_runs = 1;
 
 echo "<center>";
 
@@ -94,6 +115,7 @@ if ($end_seed < $start_seed) {
 }
 
 
+// Show the Data Model Selection regardless of the current command
 
 $json_string = "";
 $model_files = glob("data_model_files/*.json");
@@ -112,12 +134,166 @@ echo "</select>\n";
 echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"load\">Load Model</button>\n";
 echo "</p>";
 
+$dm_pars = null;
+
+
+// Each line should have:  sweep_parName   parName_sweep | parName_scalar   parName_units   parName_descr
+
+if (strcmp($what,"load") == 0) {
+  // Load the new data model
+  echo "<p><h1>LOAD from FILE</h1></p>\n";
+
+  if (strlen($model_file_name)>0) {
+
+    $json_string = file_get_contents ( $model_file_name );
+    $data_model = json_decode ( $json_string, true );
+
+    $dm_pars = $data_model["mcell"]["parameter_system"]["model_parameters"];
+  }
+} else {
+  // Build the $dm_pars array from the previous form data while preserving the order of the parameters
+  echo "<p><h1>LOAD from POST</h1></p>\n";
+  $dm_par_names = array();
+  $dm_pars = array();
+  $par_index = 0;
+  foreach ($_POST as $pkey => $pval) {
+    $key_len = strlen($pkey);
+
+    $key_pos = strrpos($pkey,"_sweep");
+    if (($key_len-$key_pos) == strlen("_sweep")) {
+      $par_name = substr($pkey,0,$key_pos);
+      if (array_search($par_name,$dm_par_names) == false) {
+        // This name isn't in the list yet
+        array_push ( $dm_par_names, $par_name );
+        $dm_pars[$par_name] = array("par_name"=>$par_name);
+      }
+      $dm_pars[$par_name]["sweep_expression"] = $pval;
+      $dm_pars[$par_name]["par_units"] = "";
+      $dm_pars[$par_name]["par_description"] = "";
+      $dm_pars[$par_name]["sweep_enabled"] = true;
+      echo "<p>Found a sweep: _POST[".$pkey."] = ".$pval." = \"".$par_name."\"</p>";
+    }
+
+    $key_pos = strrpos($pkey,"_scalar");
+    if (($key_len-$key_pos) == strlen("_scalar")) {
+      $par_name = substr($pkey,0,$key_pos);
+      if (array_search($par_name,$dm_par_names) == false) {
+        // This name isn't in the list yet
+        array_push ( $dm_par_names, $par_name );
+        $dm_pars[$par_name] = array("par_name"=>$par_name);
+      }
+      $dm_pars[$par_name]["par_expression"] = $pval;
+      $dm_pars[$par_name]["par_units"] = "";
+      $dm_pars[$par_name]["par_description"] = "";
+      $dm_pars[$par_name]["sweep_enabled"] = false;
+      echo "<p>Found a scalar: _POST[".$pkey."] = ".$pval." = \"".$par_name."\"</p>";
+    }
+  }
+
+  // Get sweep information from HTML Form
+  /*
+  if (in_array("sweep_".$par_name,array_keys($_POST))) {
+    // print ( "sweep_".$par_name." is ".$_POST["sweep_".$par_name]."<br/>" );
+    $sweep_checked = true;
+  }
+  if (in_array($par_name."_end",array_keys($_POST))) {
+    $end_val = $_POST[$par_name."_end"];
+  }
+  if (in_array($par_name."_step",array_keys($_POST))) {
+    $step_val = $_POST[$par_name."_step"];
+  }
+  */
+}
+
+if ($dm_pars != null) {
+  // Display the parameters in a table with sweep controls
+  $npars = count($dm_pars);
+  if ($npars > 0) {
+
+    // var_dump ( $pars );
+    print ( "<table style=\"width:95%\">\n" );
+    print ( "<tr><th style=\"width:5%\">Sweep</th><th style=\"width:70%\">Name &nbsp; = &nbsp; Value &nbsp; (units)</th><th>Description</th></tr>\n" );
+    foreach ($dm_pars as &$par) {
+      print ( "<tr>\n" );
+      $par_name = $par["par_name"];
+      $par_value = $par["par_expression"];
+      $sweep_expr = "";
+      if (array_key_exists("sweep_expression",$par)) {
+        $sweep_expr = $par["sweep_expression"];
+      }
+      $sweep_checked = false;
+      $sweep_visibility = "hidden";
+      $scalar_visibility = "visible";
+      if (array_key_exists("sweep_enabled",$par)) {
+        if ($par["sweep_enabled"]) {
+          $sweep_checked = true;
+          $sweep_visibility = "visible";
+          $scalar_visibility = "hidden";
+        }
+      }
+      if ($sweep_checked) {
+        print ( "  <td><center><input type=\"checkbox\" name=\"sweep_".$par_name."\" value=\"1\" checked=\"1\" onclick=\"sweep_checked('sweep_".$par_name."')\"></center></td>" );
+      } else {
+        print ( "  <td><center><input type=\"checkbox\" name=\"sweep_".$par_name."\" value=\"1\"               onclick=\"sweep_checked('sweep_".$par_name."')\"></center></td>" );
+      }
+      print ( "  <td><b>".$par_name."</b> = " );
+
+      print ( "<span id=\"".$par_name."_sweep\" class=\"".$sweep_visibility."\"><input type=\"text\" size=\"40\" name=\"".$par_name."_sweep\" value=\"".$sweep_expr."\"></span>" );
+      print ( "<span id=\"".$par_name."_scalar\" class=\"".$scalar_visibility."\"><input type=\"text\" size=\"20\" name=\"".$par_name."_scalar\" value=\"".$par_value."\"></span>" );
+
+      if (strlen($par["par_units"]) > 0) {
+        print ( " &nbsp; (".$par["par_units"].")" );
+      }
+      print ( "</td>\n" );
+      print ( "  <td>" );
+      if (strlen($par["par_description"]) > 0) {
+        print ( $par["par_description"] );
+      }
+      print ( "</td>\n" );
+      print ( "</tr>\n" );
+    }
+    unset($par);
+    print ( "</table>\n" );
+  }
+}
+
+$mcell_run_label = "Run MCell";
+if ($total_mcell_runs > 1) {
+  $mcell_run_label = sprintf("Run MCell x %d", $total_mcell_runs);
+}
+
+echo "<p style=\"padding-top:20\">";
+echo " &nbsp; &nbsp; <b>Seed Range:</b> &nbsp; <input type=\"text\" size=\"4\" min=\"1\" name=\"start_seed\" value=".$start_seed.">\n";
+echo " &nbsp; to &nbsp;                        <input type=\"text\" size=\"4\" min=\"1\" name=\"end_seed\" value=".$end_seed.">\n";
+
+echo " &nbsp; &nbsp; <b>Run Limit:</b> &nbsp; <input type=\"text\" size=\"4\" min=\"1\" name=\"run_limit\" value=".$run_limit.">\n";
+
+$button_style = "";
+if (($total_mcell_runs > 1) && ($total_mcell_runs >= (3 * $run_limit / 4) )) {
+  $button_style = "style=\"background-color: #ee6;\"";
+}
+if ($total_mcell_runs > $run_limit) {
+  $button_style = "disabled style=\"background-color: #f88;\"";
+}
+echo " &nbsp; &nbsp;  &nbsp; &nbsp; <button ".$button_style." type=\"submit\" name=\"what\" value=\"run\">".$mcell_run_label."</button>\n";
+echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"runall\">Run All</button>\n";
+echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"clear\">Refresh</button>\n";
+echo "</p>";
+
+echo "</center>";
+
+
+?>
+
+<!--
 $pars = NULL;
 
+// Show the parameters if they are available
+
 if (strlen($model_file_name)>0) {
+
   $json_string = file_get_contents ( $model_file_name );
   $data_model = json_decode ( $json_string, true );
-  // echo "\nJSON File: ".$json_file."<br/>";
 
   $pars = $data_model["mcell"]["parameter_system"]["model_parameters"];
 
@@ -127,6 +303,7 @@ if (strlen($model_file_name)>0) {
     $npars = count($pars);
     for ($i=0; $i<$npars; $i++) {
       if (in_array($pars[$i]["par_name"],array_keys($_POST))) {
+        // Assign both the scalar par_expression and the sweep_expression
         $data_model["mcell"]["parameter_system"]["model_parameters"][$i]["par_expression"] = $_POST[$pars[$i]["par_name"]];
       }
     }
@@ -137,6 +314,8 @@ if (strlen($model_file_name)>0) {
   }
 
   if (count($pars) > 0) {
+    // Display the parameters in a table with sweep controls
+
     // var_dump ( $pars );
     print ( "<table style=\"width:95%\">\n" );
     print ( "<tr><th style=\"width:5%\">Sweep</th><th style=\"width:70%\">Name &nbsp; = &nbsp; Value &nbsp; (units)</th><th>Description</th></tr>\n" );
@@ -144,13 +323,16 @@ if (strlen($model_file_name)>0) {
       print ( "<tr>\n" );
       $par_name = $par["par_name"];
       $par_value = $par["par_expression"];
+      $sweep_expr = "";
+      if (array_key_exists("sweep_expression",$par)) {
+        $sweep_expr = $par["sweep_expression"];
 
       $sweep_checked = false;
       $start_val = "";
       $end_val = "";
       $step_val = "";
       if (strcmp($what,"load") == 0) {
-        // Get sweep information from Data Model
+        // This is a new load, so get sweep information from Data Model
         if (array_key_exists("sweep_expression",$par)) {
           $sweep_expr = $par["sweep_expression"];
           $num_seps = substr_count($sweep_expr,":");
@@ -561,13 +743,18 @@ for ($seed_folder_index=0; $seed_folder_index<count($seed_folders); $seed_folder
 }
 
 ?>
+-->
 
 </form>
 
 
 <center>
 
-<!-- <center><?php phpinfo(INFO_VARIABLES); ?></center> -->
+<!-- -->
+<center><?php phpinfo(INFO_VARIABLES); ?></center>
+
+<center><?php phpinfo(); ?></center>
+<!-- -->
 
 <br/>
 
