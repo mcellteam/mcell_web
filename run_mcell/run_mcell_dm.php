@@ -1,5 +1,22 @@
 <html>
 
+<!--
+
+This HTML/PHP file presents a web interface for running MCell
+from a CellBlender Data Model file. It reads the Data Model and
+presents the model_parameters list within an HTML form which can
+be modified. The "Run MCell" button then reads the potentially
+modified parameters from the HTML form and updates the data model
+with these values. The modified data model is then written to a
+new file and run using "python run_data_model_mcell.py". The
+resulting reaction data output files are then read by PHP code
+and converted into a JSON representation which is available to a
+JavaScript plotting program "draw_data" which then plots the data
+as the last step in rendering the page.
+
+-->
+
+
 <head>
 <title>MCell Web Development - Run MCell Data Model</title>
 <link rel="stylesheet" type="text/css" href="run_style.css">
@@ -19,16 +36,15 @@
 <script>
 
 function sweep_checked ( s ) {
-  console.log ( "sweep_checked called with " + s );
-  // alert( s );
+  // This function is called when one of the "Sweep" check boxes is toggled.
+  // This function will then change the visibility status of the scalar and
+  //   sweep fields to show the proper version and hide the other.
+
   sweep_checkboxes = document.getElementsByName(s);
   if (sweep_checkboxes.length == 1) {
     sweep_item_name = s.substr("sweep_".length);
-    console.log ( "sweep_item_name is " + sweep_item_name );
     sweep_id = sweep_item_name + "_sweep";
-    console.log ( "sweep_id is " + sweep_id );
     scalar_id = sweep_item_name + "_scalar";
-    console.log ( "scalar_id is " + scalar_id );
 
     sweep_span = document.getElementById(sweep_id);
     scalar_span = document.getElementById(scalar_id);
@@ -36,12 +52,10 @@ function sweep_checked ( s ) {
       // Show the sweep field and hide the scalar field
       sweep_span.className = "visible";
       scalar_span.className = "hidden";
-      // console.log( s + " is checked" );
     } else {
       // Hide the sweep field and show the scalar field
       sweep_span.className = "hidden";
       scalar_span.className = "visible";
-      // console.log( s + " is NOT checked" );
     }
   }
 }
@@ -54,6 +68,7 @@ function sweep_checked ( s ) {
 <body>
 
 <?php
+// Get the user's name and generate a display string ($users_name_shown)
 $users_name = "";
 $users_name_shown = "";
 if (in_array("REMOTE_USER",array_keys($_SERVER))) {
@@ -67,6 +82,21 @@ if (in_array("REMOTE_USER",array_keys($_SERVER))) {
 <hr/>
 
 
+<!--
+
+This is the main form for the application. It is mostly populated with
+PHP code that reads the data model, pulls out the parameters, and displays
+them as fields in a table.
+
+The data model is read every time to avoid storing it in the web page. When
+the model is run (or the page is otherwise refreshed), the model is read based
+on the current file name, and the values from the current form are merged into
+the model. This does create the possibility of a conflict if the user should
+change the data model name but not actually reload it. This might be fixed with
+a hidden HTML field to store the name of the last data model that has been read.
+
+-->
+
 <form action="run_mcell_dm.php" method="post">
 
 <?php
@@ -75,7 +105,6 @@ echo "<center>";
 
 
 // Copy the values from the previous form to use in drawing this form
-
 
 $model_file_name = "";
 if (in_array("model_file_name",array_keys($_POST))) {
@@ -136,10 +165,10 @@ echo "</p>";
 $dm_pars = null;
 
 
-// Each line should have:  sweep_parName   parName_sweep | parName_scalar   parName_units   parName_descr
+// Collect the data from either the data model or from the data model with form data changes
 
 if (strcmp($what,"load") == 0) {
-  // Load the new data model
+  // Load the new data model from the specified file
   // echo "<p><h1>LOAD from FILE</h1></p>\n";
 
   if (strlen($model_file_name)>0) {
@@ -161,6 +190,7 @@ if (strcmp($what,"load") == 0) {
 
     $dm_pars = $data_model["mcell"]["parameter_system"]["model_parameters"];
 
+    // Update the parameters according to the fields found in the previous form data
     foreach ($dm_pars as &$par) {
       $par_name = $par["par_name"];
       if (in_array("sweep_".$par_name,array_keys($_POST))) {
@@ -181,11 +211,15 @@ if (strcmp($what,"load") == 0) {
 }
 
 if ($dm_pars != null) {
-  // Display the parameters in a table with sweep controls
+
+  // Display the parameters in a table with a sweep control check box for each one
+  // Each row should have:  sweep_parName   parName_sweep | parName_scalar   parName_units   parName_descr
+  // The choice to display parName_sweep or parName_scalar is based on the sweep_parName check box.
+  // Note that both fields are always in the form, but one is visible while the other is hidden.
+
   $npars = count($dm_pars);
   if ($npars > 0) {
 
-    // var_dump ( $pars );
     print ( "<table style=\"width:95%\">\n" );
     print ( "<tr><th style=\"width:5%\">Sweep</th><th style=\"width:70%\">Name &nbsp; = &nbsp; Value &nbsp; (units)</th><th>Description</th></tr>\n" );
     foreach ($dm_pars as &$par) {
@@ -195,6 +229,10 @@ if ($dm_pars != null) {
       $sweep_expr = "";
       if (array_key_exists("sweep_expression",$par)) {
         $sweep_expr = $par["sweep_expression"];
+      }
+      if (strlen($sweep_expr) == 0) {
+        // Initialize it with the default for convenience
+        $sweep_expr = $par_value;
       }
       $sweep_checked = false;
       $sweep_visibility = "hidden";
@@ -291,13 +329,13 @@ if (strlen($what) > 0) {
       // Substitute the updated parameters
       $dm_pars = $data_model["mcell"]["parameter_system"]["model_parameters"] = $dm_pars;
 
-      // Encode the data model as JSON and write it to the file
-      $json_output = json_encode ( $data_model );
-      file_put_contents ( $run_from_path."/data_model.json", $json_output );
-
       // Set the seed range in the data model
       $data_model["mcell"]["simulation_control"]["start_seed"] = $start_seed;
       $data_model["mcell"]["simulation_control"]["end_seed"]= $end_seed;
+
+      // Encode the data model as JSON and write it to the file
+      $json_output = json_encode ( $data_model );
+      file_put_contents ( $run_from_path."/data_model.json", $json_output );
 
       $result = shell_exec ("python run_data_model_mcell.py ".$run_from_path."/data_model.json -pd ".$run_from_path." -b ".getcwd()."/mcell -fs ".$start_seed." -ls ".$end_seed." -rl ".$run_limit);
       $output = $output.$result."\n\n";
@@ -411,7 +449,6 @@ for ($seed_folder_index=0; $seed_folder_index<count($seed_folders); $seed_folder
 }
 
 ?>
-
 
 </form>
 
