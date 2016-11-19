@@ -292,7 +292,7 @@ if (($total_mcell_runs > 1) && ($total_mcell_runs >= (3 * $run_limit / 4) )) {
 if ($total_mcell_runs > $run_limit) {
   $button_style = "disabled style=\"background-color: #f88;\"";
 }
-echo " &nbsp; &nbsp;  &nbsp; &nbsp; <button ".$button_style." type=\"submit\" name=\"what\" value=\"runall\">".$mcell_run_label."</button>\n";
+echo " &nbsp; &nbsp;  &nbsp; &nbsp; <button ".$button_style." type=\"submit\" name=\"what\" value=\"run\">".$mcell_run_label."</button>\n";
 echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"clear\">Clear</button>\n";
 echo "</p>";
 
@@ -313,9 +313,12 @@ if (strlen($what) > 0) {
 
     $output = "\n";
 
-  } elseif (strcmp($what,"runall") == 0) {
+  } elseif (strcmp($what,"run") == 0) {
 
     // Run the data model as it is without any changes from the form (ignore parameter settings and seed settings) 
+
+    // Delete everything first
+    shell_exec ("rm -Rf run_files/".$users_name."/*; ls -lR");
 
     $output = "CWD = ".getcwd()."\n";
     if (strlen($model_file_name) > 0) {
@@ -452,7 +455,6 @@ for ($seed_folder_index=0; $seed_folder_index<count($seed_folders); $seed_folder
 
 </form>
 
-
 <center>
 
 <!--
@@ -463,13 +465,26 @@ for ($seed_folder_index=0; $seed_folder_index<count($seed_folders); $seed_folder
 
 <br/>
 
-<h1>Results Plot</h1>
+<?php
 
-<!-- This fills the width, but is blurry: <canvas id="drawing_area" class="visible" width="800" height="600" style="width:95%; border:1px solid #d3d3d3;"> -->
-<canvas id="drawing_area" class="visible" width="1200" height="600" style="border:1px solid #d3d3d3;">
-Your browser does not support the HTML5 canvas tag.</canvas>
+if (count($plot_data) > 0) {
+
+  echo "<h1>Results Plot</h1>";
+
+  # <!-- This fills the width, but is blurry: <canvas id=\"drawing_area\" class=\"visible\" width=\"800\" height=\"600\" style=\"width:95%; border:1px solid #d3d3d3;\"> -->
+  echo "<canvas id=\"drawing_area\" class=\"visible\" width=\"1200\" height=\"600\" style=\"border:1px solid #d3d3d3;\">";
+  echo "Your browser does not support the HTML5 canvas tag.";
+  echo "</canvas>";
+
+} elseif (strcmp($what,"run") == 0) {
+
+  echo "<h1>No Plot Data</h1>";
+  echo "( <b>Check Run Limit</b> &nbsp; -or- &nbsp; <b>Show MCell Text Output</b> &nbsp; for errors )";
+
+}
+?>
+
 <p/>
-
 
 <br/><button type="button" id="show_hide_control" onclick="toggle_mcell_output()"><b>Show MCell Text Output</b></button>
 
@@ -502,55 +517,58 @@ var plot_data = <?php echo json_encode($plot_data); ?>;
 
 function draw_data() {
 
-  var xmin=plot_data[0][0][0];
-  var xmax=plot_data[0][0][0];
-  var ymin=plot_data[0][1][0];
-  var ymax=plot_data[0][1][0];
+  // alert ( "draw_data() plot_data.length = " + plot_data.length );
+  if (plot_data.length > 0) {
+    var xmin=plot_data[0][0][0];
+    var xmax=plot_data[0][0][0];
+    var ymin=plot_data[0][1][0];
+    var ymax=plot_data[0][1][0];
 
-  for (var pd=0; pd<plot_data.length; pd++) {
-    for (var i=0; i<plot_data[pd][0].length; i++) {
-      x = plot_data[pd][0][i];
-      y = plot_data[pd][1][i];
-      if (x < xmin) xmin = x;
-      if (x > xmax) xmax = x;
-      if (y < ymin) ymin = y;
-      if (y > ymax) ymax = y;
-    }
-  }
-  if (ymin == ymax) {
-    ymax +=  1;
-    ymin += -1;
-  }
-
-  c = document.getElementById ( "drawing_area" );
-  w = c.width;
-  h = c.height;
-  
-  var ctx = c.getContext("2d");
-  ctx.fillStyle = "#000000";
-  ctx.fillRect(0,0,w,h);
-
-  for (var pd=0; pd<plot_data.length; pd++) {
-    // console.log ( "New Plot" );
-    var colors = [ "#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff", "#00ffff" ];
-    ctx.strokeStyle = colors[pd%colors.length];
-    ctx.beginPath();
-    for (var i=0; i<plot_data[pd][0].length; i++) {
-      x = plot_data[pd][0][i];
-      y = plot_data[pd][1][i];
-      // console.log ( "  point " + x + "," + y );
-      x = w * (x-xmin) / (xmax-xmin);
-      y = h * (y-ymin) / (ymax-ymin);
-      y = h - y;
-      x = (0.05*w) + (0.9*x);
-      y = (0.05*h) + (0.9*y);
-      if (i==0) {
-        ctx.moveTo(x,y);
-      } else {
-        ctx.lineTo(x,y);
+    for (var pd=0; pd<plot_data.length; pd++) {
+      for (var i=0; i<plot_data[pd][0].length; i++) {
+        x = plot_data[pd][0][i];
+        y = plot_data[pd][1][i];
+        if (x < xmin) xmin = x;
+        if (x > xmax) xmax = x;
+        if (y < ymin) ymin = y;
+        if (y > ymax) ymax = y;
       }
     }
-    ctx.stroke();
+    if (ymin == ymax) {
+      ymax +=  1;
+      ymin += -1;
+    }
+
+    c = document.getElementById ( "drawing_area" );
+    w = c.width;
+    h = c.height;
+
+    var ctx = c.getContext("2d");
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(0,0,w,h);
+
+    for (var pd=0; pd<plot_data.length; pd++) {
+      // console.log ( "New Plot" );
+      var colors = [ "#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff", "#00ffff" ];
+      ctx.strokeStyle = colors[pd%colors.length];
+      ctx.beginPath();
+      for (var i=0; i<plot_data[pd][0].length; i++) {
+        x = plot_data[pd][0][i];
+        y = plot_data[pd][1][i];
+        // console.log ( "  point " + x + "," + y );
+        x = w * (x-xmin) / (xmax-xmin);
+        y = h * (y-ymin) / (ymax-ymin);
+        y = h - y;
+        x = (0.05*w) + (0.9*x);
+        y = (0.05*h) + (0.9*y);
+        if (i==0) {
+          ctx.moveTo(x,y);
+        } else {
+          ctx.lineTo(x,y);
+        }
+      }
+      ctx.stroke();
+    }
   }
 
 }
