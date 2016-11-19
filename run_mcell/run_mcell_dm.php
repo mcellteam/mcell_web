@@ -513,16 +513,91 @@ function toggle_mcell_output() {
 
 var plot_data = <?php echo json_encode($plot_data); ?>;
 
+
+// This function calculates an appropriate grid spacing in application units
+
+function delta_per_division_integer ( value_range, pixel_range, nominal_pixels_per_division ) {
+  // We generally want our divisions to be 1's, 2's, or 5's
+  //  (for example, every .01, or every .02, or every .05, or every .1 ...)
+
+  var nominal_divisions_per_window = (pixel_range + (nominal_pixels_per_division/2)) / nominal_pixels_per_division;
+  var nominal_delta_per_division = value_range / nominal_divisions_per_window;
+
+  // First normalize the value between 1 and 10
+  var factors_of_10 = 0;
+  var tpd = nominal_delta_per_division;
+  while (tpd > 1) {
+    tpd = tpd / 10;
+    factors_of_10 ++;
+  }
+  while (tpd < 1) {
+    tpd = tpd * 10;
+    factors_of_10 --;
+  }
+  // Now we have tpd as a floating value >= 1 and less than 10 so make some decisions
+  var tpdi = 0;
+  if (tpd < 1.5) {
+    tpdi = 1;
+  } else if (tpd < 3) {
+    tpdi = 2;
+  } else {
+    tpdi = 5;
+  }
+  // Now restore the magnitude
+  while (factors_of_10 > 0) {
+    tpdi = tpdi * 10;
+    factors_of_10 --;
+  }
+  while (factors_of_10 < 0) {
+    tpdi = tpdi / 10;
+    factors_of_10 ++;
+  }
+  return ( tpdi );
+}
+
+// This function tries to produce reasonably compact strings from numbers
+function get_compact_string ( x ) {
+  // Start with toPrecision
+  xp = x.toPrecision(3);
+  if (xp.indexOf('.') >= 0) {
+    // It has a decimal point, so might be able to remove trailing zeros
+    if (xp.indexOf('e') < 0) {
+      // It doesn't have an "e", so trailing zeros can be removed
+      while (xp.endsWith('0')) {
+        xp = xp.slice(0,-1);
+      }
+    }
+    if (xp.endsWith('.')) {
+      xp = xp.slice(0,-1);
+    }
+  }
+  // Check if exponential is smaller
+  xe = x.toExponential(2);
+  if (xe.length < xp.length) {
+    xp = xe;
+  }
+  return ( xp );
+}
+
 // This function just draws a plot of plot_data
 
 function draw_data() {
 
+  // This is some test data ... uncomment the following line and it will be used.
+  // var plot_data = [ [ [0.28, 0.4, 0.5, 0.7], [-0.3,11,10,5] ], [ [0.28, 0.4, 0.5, 0.7], [0,10,15,0] ] ];
+
+  var font_spec =  "18px Arial"; // Arial or Times
+  var font_height = 18;
+
   // alert ( "draw_data() plot_data.length = " + plot_data.length );
   if (plot_data.length > 0) {
+    // plot_data [curve_index][x/y][point#]
+
     var xmin=plot_data[0][0][0];
     var xmax=plot_data[0][0][0];
     var ymin=plot_data[0][1][0];
     var ymax=plot_data[0][1][0];
+    var x, y;
 
     for (var pd=0; pd<plot_data.length; pd++) {
       for (var i=0; i<plot_data[pd][0].length; i++) {
@@ -540,12 +615,86 @@ function draw_data() {
     }
 
     c = document.getElementById ( "drawing_area" );
-    w = c.width;
-    h = c.height;
+    var w = c.width;
+    var h = c.height;
 
     var ctx = c.getContext("2d");
     ctx.fillStyle = "#000000";
     ctx.fillRect(0,0,w,h);
+
+    // Calculate the margins
+    var left_margin = 0.07;
+    var right_margin = 0.05;
+    var top_margin = 0.05;
+    var bottom_margin = 0.07;
+
+    var xL = left_margin*w;           // Left side
+    var yB = (1.0 - bottom_margin)*h; // Bottom
+    var xR = (1-right_margin)*w;      // Right side
+    var yT = top_margin*h;            // Top
+
+    // Draw the grid lines and labels
+
+    var x_delta = delta_per_division_integer ( xmax-xmin, xR-xL, 120 );
+    var y_delta = delta_per_division_integer ( ymax-ymin, yB-yT, 120 );
+
+    var x_start = Math.floor(xmin/x_delta) * x_delta;
+    while (x_start > xmin) {
+      x_start = x_start - x_delta;
+    }
+    while (x_start < xmin) {
+      x_start = x_start + x_delta;
+    }
+
+    for (var x_line=x_start; x_line<xmax; x_line+=x_delta) {
+      x = w * (x_line-xmin) / (xmax-xmin);
+      x = (left_margin*w) + ((1-(right_margin+left_margin))*x);
+      ctx.strokeStyle = "#444444";
+      ctx.beginPath();
+      ctx.moveTo(x,yB);
+      ctx.lineTo(x,yT);
+      ctx.stroke();
+      ctx.font=font_spec; // Arial or Times
+      ctx.fillStyle="#888888";
+      var label = get_compact_string(x_line);
+      ctx.fillText(label, x-(ctx.measureText(label).width/2), yB+font_height);
+    }
+
+    var y_start = Math.floor(ymin/y_delta) * y_delta;
+    while (y_start > ymin) {
+      y_start = y_start - y_delta;
+    }
+    while (y_start < ymin) {
+      y_start = y_start + y_delta;
+    }
+
+    for (var y_line=y_start; y_line<ymax; y_line+=y_delta) {
+      y = h * (y_line-ymin) / (ymax-ymin);
+      y = h - y;
+      y = (top_margin*h) + ((1-(top_margin+bottom_margin))*y);
+      ctx.strokeStyle = "#444444";
+      ctx.beginPath();
+      ctx.moveTo(xL,y);
+      ctx.lineTo(xR,y);
+      ctx.stroke();
+      ctx.font=font_spec; // Arial or Times
+      ctx.fillStyle="#888888";
+      var label = get_compact_string(y_line);
+      ctx.fillText(label, xL-(ctx.measureText(label).width+7), y+(font_height/3));
+    }
+
+    // Draw the surrounding box
+
+    ctx.strokeStyle = "#FFFFFF";
+    ctx.beginPath();
+    ctx.moveTo(xL,yB);
+    ctx.lineTo(xR,yB);
+    ctx.lineTo(xR,yT);
+    ctx.lineTo(xL,yT);
+    ctx.lineTo(xL,yB);
+    ctx.stroke();
+
+    // Plot the actual data (easiest part!!)
 
     for (var pd=0; pd<plot_data.length; pd++) {
       // console.log ( "New Plot" );
@@ -555,12 +704,11 @@ function draw_data() {
       for (var i=0; i<plot_data[pd][0].length; i++) {
         x = plot_data[pd][0][i];
         y = plot_data[pd][1][i];
-        // console.log ( "  point " + x + "," + y );
         x = w * (x-xmin) / (xmax-xmin);
         y = h * (y-ymin) / (ymax-ymin);
         y = h - y;
-        x = (0.05*w) + (0.9*x);
-        y = (0.05*h) + (0.9*y);
+        x = (left_margin*w) + ((1-(right_margin+left_margin))*x);
+        y = (top_margin*h) + ((1-(top_margin+bottom_margin))*y);
         if (i==0) {
           ctx.moveTo(x,y);
         } else {
