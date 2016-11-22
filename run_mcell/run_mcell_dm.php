@@ -40,11 +40,14 @@ function sweep_checked ( s ) {
   // This function will then change the visibility status of the scalar and
   //   sweep fields to show the proper version and hide the other.
 
+  console.log ( "sweep_checked ( " + s + " )" );
   sweep_checkboxes = document.getElementsByName(s);
   if (sweep_checkboxes.length == 1) {
     sweep_item_name = s.substr("sweep_".length);
     sweep_id = sweep_item_name + "_sweep";
     scalar_id = sweep_item_name + "_scalar";
+
+    // console.log ( "calling getElementById for sweep_id and scalar_id" );
 
     sweep_span = document.getElementById(sweep_id);
     scalar_span = document.getElementById(scalar_id);
@@ -58,6 +61,7 @@ function sweep_checked ( s ) {
       scalar_span.className = "visible";
     }
   }
+  calculate_total_runs();
 }
 
 </script>
@@ -65,7 +69,7 @@ function sweep_checked ( s ) {
 </head>
 
 
-<body>
+<body onload="calculate_total_runs()">
 
 <?php
 // Get the user's name and generate a display string ($users_name_shown)
@@ -210,6 +214,22 @@ if (strcmp($what,"load") == 0) {
   }
 }
 
+
+$all_par_names = array();
+
+if ($dm_pars != null) {
+
+  // Generate all the parameter names array that JavaScript will use to update the total runs
+  $npars = count($dm_pars);
+  if ($npars > 0) {
+    $index = 0;
+    foreach ($dm_pars as &$par) {
+      $all_par_names[$index] = $par["par_name"];
+      $index += 1;
+    }
+  }
+}
+
 if ($dm_pars != null) {
 
   // Display the parameters in a table with a sweep control check box for each one
@@ -245,14 +265,14 @@ if ($dm_pars != null) {
         }
       }
       if ($sweep_checked) {
-        print ( "  <td><center><input type=\"checkbox\" name=\"sweep_".$par_name."\" value=\"1\" checked=\"1\" onclick=\"sweep_checked('sweep_".$par_name."')\"></center></td>" );
+        print ( "  <td><center><input type=\"checkbox\" id=\"sweep_".$par_name."\" name=\"sweep_".$par_name."\" value=\"1\" checked=\"1\" onclick=\"sweep_checked('sweep_".$par_name."')\"><span id=\"".$par_name."_count\" class=\"visible\"></span></center></td>" );
       } else {
-        print ( "  <td><center><input type=\"checkbox\" name=\"sweep_".$par_name."\" value=\"1\"               onclick=\"sweep_checked('sweep_".$par_name."')\"></center></td>" );
+        print ( "  <td><center><input type=\"checkbox\" id=\"sweep_".$par_name."\" name=\"sweep_".$par_name."\" value=\"1\"               onclick=\"sweep_checked('sweep_".$par_name."')\"><span id=\"".$par_name."_count\" class=\"hidden\"></span></center></td>" );
       }
       print ( "  <td><b>".$par_name."</b> = " );
 
-      print ( "<span id=\"".$par_name."_sweep\" class=\"".$sweep_visibility."\"><input type=\"text\" size=\"40\" name=\"".$par_name."_sweep\" value=\"".$sweep_expr."\"></span>" );
-      print ( "<span id=\"".$par_name."_scalar\" class=\"".$scalar_visibility."\"><input type=\"text\" size=\"20\" name=\"".$par_name."_scalar\" value=\"".$par_value."\"></span>" );
+      print ( "<span id=\"".$par_name."_sweep\"  class=\"".$sweep_visibility."\"><input type=\"text\"  size=\"40\" id=\"".$par_name."_sweep_val\"  name=\"".$par_name."_sweep\" value=\"".$sweep_expr."\" onchange=\"calculate_total_runs()\"></span>" );
+      print ( "<span id=\"".$par_name."_scalar\" class=\"".$scalar_visibility."\"><input type=\"text\" size=\"20\" id=\"".$par_name."_sweep_val\"  name=\"".$par_name."_scalar\" value=\"".$par_value."\" onchange=\"calculate_total_runs()\"></span>" );
 
       if (strlen($par["par_units"]) > 0) {
         print ( " &nbsp; (".$par["par_units"].")" );
@@ -280,10 +300,12 @@ if ($total_mcell_runs > 1) {
 }
 
 echo "<p style=\"padding-top:20\">";
-echo " &nbsp; &nbsp; <b>Seed Range:</b> &nbsp; <input type=\"text\" size=\"4\" min=\"1\" name=\"start_seed\" value=".$start_seed.">\n";
-echo " &nbsp; to &nbsp;                        <input type=\"text\" size=\"4\" min=\"1\" name=\"end_seed\" value=".$end_seed.">\n";
+echo " &nbsp; &nbsp; <b>Seed Range:</b> &nbsp; <input type=\"text\" size=\"4\" min=\"1\" id=\"start_seed\" name=\"start_seed\" value=".$start_seed." onchange=\"calculate_total_runs()\">\n";
+echo " &nbsp; to &nbsp;                        <input type=\"text\" size=\"4\" min=\"1\" id=\"end_seed\"   name=\"end_seed\" value=".$end_seed." onchange=\"calculate_total_runs()\">\n";
 
-echo " &nbsp; &nbsp; <b>Run Limit:</b> &nbsp; <input type=\"text\" size=\"4\" min=\"1\" name=\"run_limit\" value=".$run_limit.">\n";
+echo " &nbsp; &nbsp; <b>Total Runs = <span id=\"total_runs\">?</span> </b>";
+
+echo " &nbsp; &nbsp; <b>Run Limit:</b> &nbsp; <input type=\"text\" size=\"4\" min=\"1\" id=\"run_limit\" name=\"run_limit\" value=".$run_limit." onchange=\"calculate_total_runs()\">\n";
 
 $button_style = "";
 if (($total_mcell_runs > 1) && ($total_mcell_runs >= (3 * $run_limit / 4) )) {
@@ -292,7 +314,7 @@ if (($total_mcell_runs > 1) && ($total_mcell_runs >= (3 * $run_limit / 4) )) {
 if ($total_mcell_runs > $run_limit) {
   $button_style = "disabled style=\"background-color: #f88;\"";
 }
-echo " &nbsp; &nbsp;  &nbsp; &nbsp; <button ".$button_style." type=\"submit\" name=\"what\" value=\"run\">".$mcell_run_label."</button>\n";
+echo " &nbsp; &nbsp;  &nbsp; &nbsp; <button id=\"run_button\" ".$button_style." type=\"submit\" name=\"what\" value=\"run\">".$mcell_run_label."</button>\n";
 echo " &nbsp; &nbsp; <button type=\"submit\" name=\"what\" value=\"clear\">Clear</button>\n";
 echo "</p>";
 
@@ -496,6 +518,7 @@ if (count($plot_data) > 0) {
 
 function toggle_mcell_output() {
   // console.log ( "toggle mcell output!!" );
+  // console.log ( "calling getElementById for mcellout and show_hide_control" );
   mco = document.getElementById("mcellout");
   sh = document.getElementById("show_hide_control")
   if (mco.getAttribute('class') != "hidden") {
@@ -506,6 +529,103 @@ function toggle_mcell_output() {
     sh.innerHTML = "<b>Hide MCell Text Output</b>";
   }
 }
+
+
+// PHP will have filled in the $all_par_names variable with the names of variables.
+// This next line generates an in-line JavaScript array containing all of that data.
+
+var all_par_names = <?php echo json_encode($all_par_names); ?>;
+
+function calculate_total_runs() {
+  // This function is called when any field changes.
+
+  // This is some test data ... uncomment the following line and it will be used.
+  // var all_par_names = ['A', 'B'];
+  
+  var total_runs_so_far = 1;  // Always start out with at least one run
+
+  // console.log ( "calling getElementById for start_seed and end_seed" );
+
+  var start_seed = <?php echo $start_seed; ?>;
+  var start_seed_element = document.getElementById("start_seed");
+  if (start_seed_element != null) {
+    start_seed = parseInt(start_seed_element.value);
+  }
+  console.log ( "start seed = " + start_seed );
+
+  var end_seed = <?php echo $end_seed; ?>;
+  var end_seed_element = document.getElementById("end_seed");
+  if (end_seed_element != null) {
+    end_seed = parseInt(end_seed_element.value);
+  }
+  console.log ( "end seed = " + end_seed );
+
+  total_runs_so_far *= (1 + end_seed - start_seed);
+
+  for (n=0; n<all_par_names.length; n++) {
+    var par_name = all_par_names[n];
+    var runs_for_this_par = 1;
+    // console.log ( "calling getElementById for sweep_" + par_name + " and " + par_name + "_sweep" );
+    var par_sweep_check = document.getElementById("sweep_" + par_name);
+    if ( (par_sweep_check != null) && (par_sweep_check.checked) ) {
+	    runs_for_this_par = 0;
+      var par_sweep_string = document.getElementById(par_name + "_sweep_val").value;
+      // Split by commas to get the sections
+      var par_sweep_sections = par_sweep_string.split(",");
+      //alert ( par_name + " has " + par_sweep_sections.length + " sections ..." );
+      for (var par_sweep_section_num in par_sweep_sections) {
+        par_sweep_section = par_sweep_sections[par_sweep_section_num].trim();
+        if (par_sweep_section.length > 0) {
+          // Split by colons to get the subsections
+          var par_sweep_subsections = par_sweep_section.split(":");
+          if (par_sweep_subsections.length <= 1) {
+            // No colons, so this is either a single value (add 1) or empty (add none)
+            runs_for_this_par += par_sweep_subsections.length;
+          } else {
+            // At least one colon, so this is a range
+            var sweep_start = parseFloat(par_sweep_subsections[0]);
+            var sweep_end = parseFloat(par_sweep_subsections[1]);
+            var sweep_step = 1.0;
+  	        if (par_sweep_subsections.length >= 3) {
+  	          // The third value is the step size
+  	          sweep_step = parseFloat(par_sweep_subsections[2]);
+  	        }
+  	        // The tolerance is somewhat arbitrary ...
+            runs_for_this_par += 1 + Math.floor(1.0001*(sweep_end-sweep_start)/sweep_step);
+          }
+        }
+      }
+    }
+    // console.log ( "calling getElementById for _count" );
+    console.log ( "Setting " + par_name + "_count to " + runs_for_this_par );
+    if (runs_for_this_par != 1) {
+      document.getElementById(par_name + "_count").innerHTML = " x <b>" + runs_for_this_par + "</b>";
+      document.getElementById(par_name + "_count").className = "visible";
+    } else {
+      document.getElementById(par_name + "_count").innerHTML = "";
+      document.getElementById(par_name + "_count").className = "hidden";
+    }
+    total_runs_so_far *= runs_for_this_par;
+  }
+
+  // console.log ( "calling getElementById for total_runs and run_button and run_limit" );
+  total_runs_field = document.getElementById("total_runs");
+  total_runs_field.innerHTML = total_runs_so_far;
+
+  run_button = document.getElementById("run_button");
+  // Normal button color appears to be #d2d2d2
+  if (total_runs_so_far > parseInt(document.getElementById("run_limit").value)) {
+    run_button.style.background = "#ee9999";
+    run_button.disabled = true;
+  } else {
+    run_button.style.background = "#aaeeaa";
+    run_button.disabled = false;
+  }
+
+  return (total_runs_so_far);
+}
+
+
 
 // PHP will have filled in the $plot_data variable with the plot data (above).
 // This next line generates an in-line JavaScript array containing all of that data.
@@ -613,6 +733,8 @@ function draw_data() {
       ymax +=  1;
       ymin += -1;
     }
+
+    // console.log ( "calling getElementById for drawing_area" );
 
     c = document.getElementById ( "drawing_area" );
     var w = c.width;
