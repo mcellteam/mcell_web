@@ -40,7 +40,7 @@ function sweep_checked ( s ) {
   // This function will then change the visibility status of the scalar and
   //   sweep fields to show the proper version and hide the other.
 
-  console.log ( "sweep_checked ( " + s + " )" );
+  // console.log ( "sweep_checked ( " + s + " )" );
   sweep_checkboxes = document.getElementsByName(s);
   if (sweep_checkboxes.length == 1) {
     sweep_item_name = s.substr("sweep_".length);
@@ -551,14 +551,14 @@ function calculate_total_runs() {
   if (start_seed_element != null) {
     start_seed = parseInt(start_seed_element.value);
   }
-  console.log ( "start seed = " + start_seed );
+  // console.log ( "start seed = " + start_seed );
 
   var end_seed = <?php echo $end_seed; ?>;
   var end_seed_element = document.getElementById("end_seed");
   if (end_seed_element != null) {
     end_seed = parseInt(end_seed_element.value);
   }
-  console.log ( "end seed = " + end_seed );
+  // console.log ( "end seed = " + end_seed );
 
   total_runs_so_far *= (1 + end_seed - start_seed);
 
@@ -597,7 +597,7 @@ function calculate_total_runs() {
       }
     }
     // console.log ( "calling getElementById for _count" );
-    console.log ( "Setting " + par_name + "_count to " + runs_for_this_par );
+    // console.log ( "Setting " + par_name + "_count to " + runs_for_this_par );
     if (runs_for_this_par != 1) {
       document.getElementById(par_name + "_count").innerHTML = " x <b>" + runs_for_this_par + "</b>";
       document.getElementById(par_name + "_count").className = "visible";
