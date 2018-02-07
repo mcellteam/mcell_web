@@ -48,6 +48,9 @@
  </colgroup>
  <tr valign="top">
   <td class="leftside">
+   <p class="leftside">Tutorials:</a></p>
+   <p class="leftside1"><a href="tutorials/SimpleReleaseTwoMolecules/index.html">Demonstration Model</a></p>
+   <hr />
    <p class="leftside">Run MCell:</a></p>
    <p class="leftside1"><a href="run_mcell/run_mcell_mdl.php">MDL</a></p>
    <p class="leftside1"><a href="run_mcell/run_mcell_simple.php">Data Model</a></p>
