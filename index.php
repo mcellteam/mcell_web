@@ -49,7 +49,8 @@
  <tr valign="top">
   <td class="leftside">
    <p class="leftside">Tutorials:</a></p>
-   <p class="leftside1"><a href="tutorials/SimpleReleaseTwoMolecules/index.html">Demonstration Model</a></p>
+   <p class="leftside1"><a href="cellblender_tutorials/index.html">CellBlender Tutorials</a></p>
+   <p class="leftside1"><a href="tutorials/SimpleReleaseTwoMolecules/index.html">Quick Tutorial Demo</a></p>
    <hr />
    <p class="leftside">Run MCell:</a></p>
    <p class="leftside1"><a href="run_mcell/run_mcell_mdl.php">MDL</a></p>
